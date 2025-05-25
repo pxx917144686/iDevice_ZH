@@ -651,7 +651,7 @@ struct ContentView: View {
     var body: some View {
         mainView
             .onAppear {
-                print("iDevice 工具箱\n[*] 检测到设备  \(device.systemName!) \(device.systemVersion!), \(device.description)")
+                print("iDevice\n[*] 检测到设备  \(device.systemName!) \(device.systemVersion!), \(device.description)")
                 checkVersionCompatibility()
                 iDeviceLogger("[i] iDevice Central: 终端会话已启动")
                 
@@ -858,7 +858,7 @@ struct ContentView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(ToolkitColors.accent)
                 
-                Text("iDevice 工具箱")
+                Text("iDevice")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
             }
@@ -1021,11 +1021,11 @@ struct ContentView: View {
                 .padding(.top, 2)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("如何恢复调整")
+                Text("怎么恢复？")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
                 
-                Text("所有调整都直接应用于RAM而非持久存储。如果遇到任何问题或想恢复到原始设置，只需重启设备即可从内存中清除所有调整。")
+                Text("所有调整都直接应用于RAM而非持久存储。如果遇到任何问题或想恢复到原始设置，只需重启从内存中清除。")
                     .font(.system(size: 14))
                     .foregroundColor(.white.opacity(0.8))
                     .fixedSize(horizontal: false, vertical: true)
