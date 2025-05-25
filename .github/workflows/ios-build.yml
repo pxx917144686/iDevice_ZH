@@ -53,89 +53,6 @@ jobs:
           echo "在Copy Bundle Resources阶段找到Info.plist引用，准备移除..."
           sed -i '' '/Info.plist in Resources/d' iDevice_ZH.xcodeproj/project.pbxproj
         fi
-        
-    # 增强型模块映射修复步骤
-    - name: 增强型模块映射修复
-      run: |
-        # 创建一个更全面的ModuleMapFix.h文件
-        cat > iDevice_ZH/ModuleMapFix.h << EOL
-        //
-        //  ModuleMapFix.h
-        //  iDevice Toolkit
-        //
-        //  Created on $(date +"%m/%d/%y")
-        //
-
-        #ifndef ModuleMapFix_h
-        #define ModuleMapFix_h
-
-        // 使用传统包含方式避免模块冲突
-        #import <os/object.h>
-        #import <os/base.h>
-        #import <os/lock.h>
-        #import <os/log.h>
-        
-        // 预定义相关类型以避免模块冲突
-        #ifndef OS_OBJECT_HAVE_OBJC_SUPPORT
-        #define OS_OBJECT_HAVE_OBJC_SUPPORT 1
-        #endif
-
-        #endif /* ModuleMapFix_h */
-        EOL
-        
-        # 修改项目设置以避免模块问题
-        echo "===== 修改项目设置以避免模块问题 ====="
-        
-        # 1. 在所有Swift文件中添加导入修复
-        echo "// 在Swift文件中添加导入修复"
-        find iDevice_ZH -name "*.swift" -exec sed -i '' '1s/^/import Foundation\n/' {} \;
-        
-        # 2. 修改Xcode项目配置
-        if [ -f "iDevice_ZH.xcodeproj/project.pbxproj" ]; then
-          echo "修改Xcode项目配置..."
-          # 禁用模块化头文件
-          sed -i '' 's/CLANG_ENABLE_MODULES = YES;/CLANG_ENABLE_MODULES = NO;/g' iDevice_ZH.xcodeproj/project.pbxproj
-          # 添加预处理器定义
-          sed -i '' 's/GCC_PREPROCESSOR_DEFINITIONS = /GCC_PREPROCESSOR_DEFINITIONS = "DISABLE_EXPLICIT_MODULE=1 OS_OBJECT_USE_OBJC=0 "/g' iDevice_ZH.xcodeproj/project.pbxproj
-        fi
-        
-        # 3. 在Podfile.lock中修改设置（如果存在）
-        if [ -f "Podfile.lock" ]; then
-          echo "修改Podfile.lock..."
-          sed -i '' 's/CLANG_ENABLE_MODULES = YES/CLANG_ENABLE_MODULES = NO/g' Podfile.lock || true
-          sed -i '' 's/CLANG_ENABLE_MODULE_DEBUGGING = YES/CLANG_ENABLE_MODULE_DEBUGGING = NO/g' Podfile.lock || true
-        fi
-        
-        # 4. 创建模块映射覆盖
-        mkdir -p ModuleOverrides
-        cat > ModuleOverrides/module.modulemap << EOL
-        // 覆盖模块映射以避免os_object冲突
-        module os_object {
-          export *
-          header "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/include/os/object.h"
-          link "System"
-        }
-        EOL
-        
-        # 设置环境变量
-        echo "SWIFT_DISABLE_SAFETY_CHECKS=YES" >> $GITHUB_ENV
-        echo "SWIFT_ENFORCE_EXCLUSIVE_ACCESS=off" >> $GITHUB_ENV
-        echo "SWIFT_ENABLE_BATCH_MODE=NO" >> $GITHUB_ENV
-    
-    - name: 清理构建缓存
-      run: |
-        # 清理所有派生数据和缓存
-        rm -rf ~/Library/Developer/Xcode/DerivedData/*
-        rm -rf ~/Library/Caches/com.apple.dt.Xcode/*
-        rm -rf ~/Library/Developer/Xcode/Archives/*
-        
-        if [ -d "~/Library/Caches/CocoaPods" ]; then
-          rm -rf ~/Library/Caches/CocoaPods/*
-        fi
-        
-        # 显示环境信息以进行诊断
-        xcodebuild -version
-        swift --version
     
     - name: 构建和归档应用
       run: |
@@ -149,7 +66,7 @@ jobs:
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 构建并归档应用 - 增强构建设置
+        # 构建并归档应用
         xcodebuild clean archive $WORKSPACE_ARG \
           -scheme "iDevice_ZH" \
           -configuration Debug \
@@ -158,18 +75,8 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
           SWIFT_OPTIMIZATION_LEVEL="-Onone" \
-          IPHONEOS_DEPLOYMENT_TARGET=16.0 \
-          GCC_PREPROCESSOR_DEFINITIONS="$GCC_PREPROCESSOR_DEFINITIONS DISABLE_EXPLICIT_MODULE=1 OS_OBJECT_USE_OBJC=0" \
-          SWIFT_DISABLE_SAFETY_CHECKS=YES \
-          SWIFT_ENFORCE_EXCLUSIVE_ACCESS=off \
-          SWIFT_ENABLE_BATCH_MODE=NO \
-          OTHER_CFLAGS="-fno-modules -fno-autolink" \
-          OTHER_SWIFT_FLAGS="-Xfrontend -disable-implicit-stdlib-module-map" \
-          SWIFT_DISABLE_SAFETY_CHECKS=YES \
-          SWIFT_STRICT_CONCURRENCY=minimal \
-          -verbose
+          IPHONEOS_DEPLOYMENT_TARGET=16.0
       
-    # 后续步骤保持不变...
     - name: 打包IPA
       run: |
         # 创建IPA结构
