@@ -37,7 +37,7 @@ jobs:
         fi
       working-directory: ${{ github.workspace }}
       
-    - name: 彻底修复Info.plist重复问题
+    - name: 修复Info.plist重复问题
       run: |
         # 创建桥接头文件
         echo "int poc(char *path);" > iDevice_ZH/iDevice_ZH-Bridge-Header.h
@@ -48,18 +48,38 @@ jobs:
         # 准备Info.plist文件
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
-        # 原始文件中的Info.plist引用
-        echo "原始project.pbxproj中的Info.plist引用:"
+        # 检查当前Info.plist引用
+        echo "当前project.pbxproj中的Info.plist引用:"
         grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "没有找到Info.plist引用"
         
-        # 使用简单的替换方法移除Info.plist引用
-        echo "使用临时文件方式清理Info.plist引用"
-        grep -v "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
-        mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
+        # 使用更精确的方式修复Info.plist重复问题
+        # 1. 找到包含Info.plist的行
+        # 2. 确定是否有多个INFOPLIST_FILE定义
+        INFOPLIST_ENTRIES=$(grep -n "INFOPLIST_FILE" iDevice_ZH.xcodeproj/project.pbxproj || echo "")
         
-        # 清理后检查
-        echo "清理后的project.pbxproj中的Info.plist引用:"
-        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "所有Info.plist引用已清除"
+        if [ ! -z "$INFOPLIST_ENTRIES" ]; then
+          echo "找到多个INFOPLIST_FILE条目，将保留一个并移除其他..."
+          # 创建一个临时文件来处理project.pbxproj
+          sed -E '/INFOPLIST_FILE = ".*Info\.plist";/ d' iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
+          mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
+          
+          # 添加正确的Info.plist引用
+          sed -i '' '/PRODUCT_BUNDLE_IDENTIFIER/a\\
+          \t\t\t\tINFOPLIST_FILE = "iDevice_ZH/Info.plist";' iDevice_ZH.xcodeproj/project.pbxproj
+        fi
+        
+        # 检查是否有其他Info.plist的复制构建阶段
+        COPY_PHASE=$(grep -n "Copy Bundle Resources.*Info.plist" -A 10 iDevice_ZH.xcodeproj/project.pbxproj || echo "")
+        
+        if [ ! -z "$COPY_PHASE" ]; then
+          echo "找到Info.plist的复制构建阶段，移除重复引用..."
+          # 移除复制阶段中的Info.plist引用
+          sed -i '' '/Info\.plist in Resources/,/);/s/Info\.plist.*,//' iDevice_ZH.xcodeproj/project.pbxproj
+        fi
+        
+        # 检查更改后的状态
+        echo "修复后的project.pbxproj中的Info.plist引用:"
+        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "所有重复的Info.plist引用已清除"
 
     - name: 构建应用
       run: |
@@ -72,8 +92,8 @@ jobs:
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 使用模拟器构建，不指定Info.plist路径
-        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+        # 使用模拟器构建，显式指定Info.plist路径
+        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" INFOPLIST_FILE="iDevice_ZH/Info.plist" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
       working-directory: ${{ github.workspace }}
       
     - name: 上传构建产物
@@ -108,7 +128,7 @@ jobs:
         fi
       working-directory: ${{ github.workspace }}
     
-    - name: 彻底修复Info.plist重复问题
+    - name: 修复Info.plist重复问题
       run: |
         # 创建桥接头文件
         echo "int poc(char *path);" > iDevice_ZH/iDevice_ZH-Bridge-Header.h
@@ -119,9 +139,30 @@ jobs:
         # 准备Info.plist文件
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
-        # 使用简单的替换方法移除Info.plist引用
-        grep -v "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
-        mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
+        # 使用更精确的方式修复Info.plist重复问题
+        # 1. 找到包含Info.plist的行
+        # 2. 确定是否有多个INFOPLIST_FILE定义
+        INFOPLIST_ENTRIES=$(grep -n "INFOPLIST_FILE" iDevice_ZH.xcodeproj/project.pbxproj || echo "")
+        
+        if [ ! -z "$INFOPLIST_ENTRIES" ]; then
+          echo "找到多个INFOPLIST_FILE条目，将保留一个并移除其他..."
+          # 创建一个临时文件来处理project.pbxproj
+          sed -E '/INFOPLIST_FILE = ".*Info\.plist";/ d' iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
+          mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
+          
+          # 添加正确的Info.plist引用
+          sed -i '' '/PRODUCT_BUNDLE_IDENTIFIER/a\\
+          \t\t\t\tINFOPLIST_FILE = "iDevice_ZH/Info.plist";' iDevice_ZH.xcodeproj/project.pbxproj
+        fi
+        
+        # 检查是否有其他Info.plist的复制构建阶段
+        COPY_PHASE=$(grep -n "Copy Bundle Resources.*Info.plist" -A 10 iDevice_ZH.xcodeproj/project.pbxproj || echo "")
+        
+        if [ ! -z "$COPY_PHASE" ]; then
+          echo "找到Info.plist的复制构建阶段，移除重复引用..."
+          # 移除复制阶段中的Info.plist引用
+          sed -i '' '/Info\.plist in Resources/,/);/s/Info\.plist.*,//' iDevice_ZH.xcodeproj/project.pbxproj
+        fi
       
     - name: 确保正确使用ExportOptions.plist
       run: |
@@ -175,8 +216,8 @@ jobs:
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 针对模拟器构建并归档，不指定Info.plist
-        xcodebuild $WORKSPACE_ARG -scheme "iDevice_ZH" -configuration Debug -sdk iphonesimulator -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO EXCLUDED_ARCHS=arm64
+        # 针对模拟器构建并归档，显式指定Info.plist
+        xcodebuild $WORKSPACE_ARG -scheme "iDevice_ZH" -configuration Debug -sdk iphonesimulator -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive INFOPLIST_FILE="iDevice_ZH/Info.plist" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO EXCLUDED_ARCHS=arm64
         
         # 检查归档是否成功
         ls -la $RUNNER_TEMP/iDevice_ZH.xcarchive/Products/ || true
