@@ -37,9 +37,15 @@ jobs:
         fi
       working-directory: ${{ github.workspace }}
       
-    - name: 修复桥接头文件路径
+    - name: 修复Info.plist路径和桥接头文件路径
       run: |
+        # 复制Info.plist到正确位置
+        cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
+        
+        # 创建桥接头文件
         echo "int poc(char *path);" > iDevice_ZH/iDevice_ZH-Bridge-Header.h
+        
+        # 修复桥接头文件路径
         sed -i '' 's|/Users/geosn0w/Desktop/iDevice_ZH/iDevice_ZH/iDevice_ZH-Bridge-Header.h|iDevice_ZH/iDevice_ZH-Bridge-Header.h|g' iDevice_ZH.xcodeproj/project.pbxproj
 
     - name: 构建应用
@@ -53,8 +59,8 @@ jobs:
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 使用一个在CI环境中可用的模拟器，例如iPhone 16 Pro
-        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+        # 使用模拟器构建
+        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO INFOPLIST_FILE="iDevice_ZH/Info.plist"
       working-directory: ${{ github.workspace }}
       
     - name: 上传构建产物
@@ -68,7 +74,7 @@ jobs:
     name: 归档IPA
     needs: build
     runs-on: macos-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: success()
     
     steps:
     - name: 检出代码
@@ -79,23 +85,70 @@ jobs:
       with:
         xcode-version: latest-stable
     
-    - name: 修复桥接头文件路径
+    - name: 安装依赖
       run: |
+        gem install cocoapods
+        if [ -f "Podfile" ]; then
+          pod install --repo-update
+        else
+          echo "没有找到Podfile，跳过CocoaPods依赖安装"
+        fi
+      working-directory: ${{ github.workspace }}
+    
+    - name: 准备Info.plist和桥接头文件
+      run: |
+        # 复制Info.plist到正确位置
+        cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
+        
+        # 创建桥接头文件
         echo "int poc(char *path);" > iDevice_ZH/iDevice_ZH-Bridge-Header.h
+        
+        # 修复桥接头文件路径
         sed -i '' 's|/Users/geosn0w/Desktop/iDevice_ZH/iDevice_ZH/iDevice_ZH-Bridge-Header.h|iDevice_ZH/iDevice_ZH-Bridge-Header.h|g' iDevice_ZH.xcodeproj/project.pbxproj
       
-    - name: 强制使用Debug配置
+    - name: 确保正确使用ExportOptions.plist
       run: |
-        # 修改构建配置，确保使用 Debug 配置进行归档（包含 -Onone 优化级别）
-        if [ -f "iDevice_ZH.xcodeproj/project.pbxproj" ]; then
-          # 确保Swift优化级别设置正确
-          sed -i '' 's/SWIFT_OPTIMIZATION_LEVEL = "-O"/SWIFT_OPTIMIZATION_LEVEL = "-Onone"/g' iDevice_ZH.xcodeproj/project.pbxproj
-          sed -i '' 's/SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule"/SWIFT_OPTIMIZATION_LEVEL = "-Onone"/g' iDevice_ZH.xcodeproj/project.pbxproj
+        # 使用项目中现有的ExportOptions.plist，如果存在的话
+        if [ -f "ExportOptions.plist" ]; then
+          echo "使用项目中现有的ExportOptions.plist"
+          cp ExportOptions.plist $RUNNER_TEMP/ExportOptions.plist
+        else
+          # 否则创建一个新的，确保包含应用组ID
+          echo "创建新的ExportOptions.plist"
+          cat > $RUNNER_TEMP/ExportOptions.plist << EOF
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>method</key>
+            <string>development</string>
+            <key>compileBitcode</key>
+            <false/>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>teamID</key>
+            <string>423J45LL22</string>
+            <key>provisioningProfiles</key>
+            <dict>
+                <key>com.idevicecentral.toolkit</key>
+                <string>iDevice Toolkit Development</string>
+            </dict>
+            <key>applicationGroups</key>
+            <array>
+                <string>group.com.idevicecentral.toolkit</string>
+            </array>
+        </dict>
+        </plist>
+        EOF
         fi
+        
+        # 显示最终的ExportOptions.plist内容以便验证
+        echo "ExportOptions.plist内容:"
+        cat $RUNNER_TEMP/ExportOptions.plist
   
-    - name: 构建和归档
+    - name: 构建和归档 (模拟器)
       run: |
-        # 检查工作区文件是否存在，并使用正确的路径
+        # 确定工作区或项目参数
         if [ -f "iDevice_ZH.xcworkspace/contents.xcworkspacedata" ]; then
           WORKSPACE_ARG="-workspace iDevice_ZH.xcworkspace"
         else
@@ -105,18 +158,66 @@ jobs:
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 使用指定的scheme和配置
-        xcodebuild $WORKSPACE_ARG -scheme "iDevice_ZH" -configuration Debug -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO SWIFT_OPTIMIZATION_LEVEL="-Onone"
+        # 针对模拟器构建并归档
+        xcodebuild $WORKSPACE_ARG -scheme "iDevice_ZH" -configuration Debug -sdk iphonesimulator -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO INFOPLIST_FILE="iDevice_ZH/Info.plist"
         
-        # 创建导出目录
-        mkdir -p $RUNNER_TEMP/build
-        
-        # 复制构建产物
-        cp -R $RUNNER_TEMP/iDevice_ZH.xcarchive $RUNNER_TEMP/build/
+        # 检查归档是否成功
+        ls -la $RUNNER_TEMP/iDevice_ZH.xcarchive/Products/ || true
     
-    - name: 上传构建产物
+    - name: 手动创建IPA
+      run: |
+        # 手动打包IPA
+        mkdir -p $RUNNER_TEMP/ipa/Payload
+        
+        # 查找应用程序位置
+        echo "查找应用程序..."
+        APP_PATH="$RUNNER_TEMP/iDevice_ZH.xcarchive/Products/Applications/iDevice_ZH.app"
+        
+        # 如果找不到主路径，搜索整个归档目录
+        if [ ! -d "$APP_PATH" ]; then
+          echo "在主路径未找到应用，搜索其他位置..."
+          APP_PATH=$(find $RUNNER_TEMP/iDevice_ZH.xcarchive -name "*.app" -type d | head -n 1)
+        fi
+        
+        # 如果仍找不到，尝试在build目录查找
+        if [ ! -d "$APP_PATH" ]; then
+          echo "在归档中未找到应用，搜索构建目录..."
+          APP_PATH=$(find $GITHUB_WORKSPACE/build -name "*.app" -type d | head -n 1)
+        fi
+        
+        # 如果找到应用，进行打包
+        if [ -d "$APP_PATH" ]; then
+          echo "找到应用程序: $APP_PATH，开始打包IPA..."
+          
+          # 确保Info.plist在应用包中
+          if [ ! -f "$APP_PATH/Info.plist" ]; then
+            echo "在应用包中未找到Info.plist，复制项目Info.plist..."
+            cp iDevice_ZH/Info.plist "$APP_PATH/Info.plist"
+          fi
+          
+          # 复制应用到Payload目录
+          cp -R "$APP_PATH" $RUNNER_TEMP/ipa/Payload/
+          
+          # 打包IPA
+          cd $RUNNER_TEMP/ipa
+          zip -r iDevice_ZH.ipa Payload
+          
+          # 验证IPA
+          ls -la $RUNNER_TEMP/ipa
+          echo "IPA创建完成: $(du -h iDevice_ZH.ipa | cut -f1)"
+        else
+          echo "错误: 无法找到应用程序"
+          exit 1
+        fi
+    
+    - name: 上传IPA文件
+      uses: actions/upload-artifact@v4
+      with:
+        name: iDevice_ZH-IPA
+        path: ${{ runner.temp }}/ipa/iDevice_ZH.ipa
+        
+    - name: 上传归档文件
       uses: actions/upload-artifact@v4
       with:
         name: iDevice_ZH-Archive
-        path: ${{ runner.temp }}/build/
-
+        path: ${{ runner.temp }}/iDevice_ZH.xcarchive/
