@@ -38,7 +38,7 @@ struct FileContentView: View {
             if showCopiedPathToast {
                 VStack {
                     Spacer()
-                    Text("路径已复制到剪贴板")
+                    Text("Path copied to clipboard")
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 8)
@@ -69,7 +69,7 @@ struct FileContentView: View {
             Button(action: {
                 presentationMode.wrappedValue.dismiss()
             }) {
-                Text("关闭")
+                Text("Close")
                     .foregroundColor(ToolkitColors.accent)
             }
             
@@ -88,7 +88,7 @@ struct FileContentView: View {
                     showCopiedPathToast = true
                 }
             }) {
-                Text("复制路径")
+                Text("Copy Path")
                     .foregroundColor(ToolkitColors.accent)
             }
         }
@@ -168,7 +168,7 @@ struct FileContentView: View {
                 if let audioPlayer = audioPlayer {
                     VStack(spacing: 6) {
                         HStack {
-                            Text("格式:")
+                            Text("Format:")
                                 .font(.caption)
                                 .foregroundColor(ToolkitColors.accent)
                             
@@ -180,7 +180,7 @@ struct FileContentView: View {
                         }
                         
                         HStack {
-                            Text("时长:")
+                            Text("Duration:")
                                 .font(.caption)
                                 .foregroundColor(ToolkitColors.accent)
                             
@@ -210,9 +210,9 @@ struct FileContentView: View {
             }
             .alert(isPresented: $showError) {
                 Alert(
-                    title: Text("音频错误"),
+                    title: Text("Audio Error"),
                     message: Text(errorMessage),
-                    dismissButton: .default(Text("确定"))
+                    dismissButton: .default(Text("OK"))
                 )
             }
             .onChange(of: playerDelegate.didFinishPlaying) { didFinish in
@@ -233,7 +233,7 @@ struct FileContentView: View {
                 audioPlayer?.delegate = playerDelegate
                 audioPlayer?.prepareToPlay()
             } catch {
-                errorMessage = "加载音频失败: \(error.localizedDescription)"
+                errorMessage = "Failed to load audio: \(error.localizedDescription)"
                 showError = true
             }
         }
@@ -270,13 +270,13 @@ struct FileContentView: View {
             case "wav":
                 return "WAV"
             case "caf":
-                return "核心音频格式"
+                return "Core Audio Format"
             case "aiff", "aif":
                 return "AIFF"
             case "flac":
                 return "FLAC"
             default:
-                return "音频文件"
+                return "Audio File"
             }
         }
     }
@@ -289,10 +289,10 @@ struct FileContentView: View {
                     .scaledToFit()
                     .padding()
             } else {
-                errorView(message: "加载图片失败")
+                errorView(message: "Failed to load image")
             }
             
-            Text("大小: \(viewModel.formattedFileSize(size: file.size))")
+            Text("Size: \(viewModel.formattedFileSize(size: file.size))")
                 .font(.caption)
                 .foregroundColor(.gray)
                 .padding(.bottom)
@@ -314,7 +314,7 @@ struct FileContentView: View {
             } else if let error = result.error {
                 errorView(message: error)
             } else {
-                errorView(message: "加载plist内容时出现未知错误")
+                errorView(message: "Unknown error loading plist content")
             }
         }
     }
@@ -334,7 +334,7 @@ struct FileContentView: View {
             } else if let error = result.error {
                 errorView(message: error)
             } else {
-                errorView(message: "加载文本内容时出现未知错误")
+                errorView(message: "Unknown error loading text content")
             }
         }
     }
@@ -350,7 +350,7 @@ struct FileContentView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } else {
-                errorView(message: "生成十六进制转储失败")
+                errorView(message: "Failed to generate hex dump")
             }
         }
     }
@@ -502,45 +502,45 @@ class SystemFileManagerModel: ObservableObject {
                 if data.count >= 8 {
                     let signature = data.prefix(8)
                     if signature.starts(with: [98, 112, 108, 105, 115, 116]) {
-                        return "二进制属性列表"
+                        return "Binary Property List"
                     }
                 }
-                return "属性列表"
+                return "Property List"
             } catch {
-                return "属性列表"
+                return "Property List"
             }
         case "xml":
-            return "XML文件"
+            return "XML File"
         case "html", "htm":
-            return "HTML文件"
+            return "HTML File"
         case "txt", "log", "md":
-            return "文本文件"
+            return "Text File"
         case "png", "jpg", "jpeg", "gif", "heic":
-            return "图片"
+            return "Image"
         case "pdf":
-            return "PDF文档"
+            return "PDF Document"
         case "c", "h", "swift", "m", "cpp", "php", "js", "css":
-            return "源代码"
+            return "Source Code"
         case "zip", "rar", "tar", "gz":
-            return "压缩包"
+            return "Archive"
         case "json":
-            return "JSON文件"
+            return "JSON File"
         case "mp3":
-            return "MP3音频文件"
+            return "MP3 Audio File"
         case "m4a", "aac":
-            return "AAC音频文件"
+            return "AAC Audio File"
         case "wav":
-            return "WAV音频文件"
+            return "WAV Audio File"
         case "caf":
-            return "CAF音频文件"
+            return "CAF Audio File"
         case "aiff", "aif":
-            return "AIFF音频文件"
+            return "AIFF Audio File"
         case "flac":
-            return "FLAC音频文件"
+            return "FLAC Audio File"
         case "":
             var isDirectory: ObjCBool = false
             if FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory), isDirectory.boolValue {
-                return "目录"
+                return "Directory"
             }
 
             do {
@@ -548,15 +548,15 @@ class SystemFileManagerModel: ObservableObject {
                 if data.count >= 8 {
                     let signature = data.prefix(8)
                     if signature.starts(with: [98, 112, 108, 105, 115, 116]) { // "bplist" in ASCII
-                        return "二进制属性列表"
+                        return "Binary Property List"
                     }
                 }
             } catch {
             }
             
-            return "二进制文件"
+            return "Binary File"
         default:
-            return "未知文件类型"
+            return "Unknown File Type"
         }
     }
     
@@ -601,12 +601,12 @@ class SystemFileManagerModel: ObservableObject {
     }
     
     func readFileContent(path: String) -> (content: String?, error: String?) {
-        if path.isEmpty { return (nil, "无效的文件路径") }
+        if path.isEmpty { return (nil, "Invalid file path") }
         
         do {
             let data = try Data(contentsOf: URL(fileURLWithPath: path))
         
-            if detectFileType(for: path) == "二进制属性列表" {
+            if detectFileType(for: path) == "Binary Property List" {
                 do {
                     let plistObj = try PropertyListSerialization.propertyList(from: data, options: [], format: nil)
                     let xmlData = try PropertyListSerialization.data(fromPropertyList: plistObj, format: .xml, options: 0)
@@ -614,10 +614,10 @@ class SystemFileManagerModel: ObservableObject {
                     if let xmlString = String(data: xmlData, encoding: .utf8) {
                         return (xmlString, nil)
                     } else {
-                        return (nil, "无法将二进制plist转换为可读格式")
+                        return (nil, "Failed to convert binary plist to readable format")
                     }
                 } catch {
-                    return (nil, "处理plist时出错: \(error.localizedDescription)")
+                    return (nil, "Error processing plist: \(error.localizedDescription)")
                 }
             }
             
@@ -636,10 +636,10 @@ class SystemFileManagerModel: ObservableObject {
                 }
             }
             
-            return (nil, "二进制文件 - 无法显示内容")
+            return (nil, "Binary file - cannot display content")
             
         } catch {
-            return (nil, "读取文件出错: \(error.localizedDescription)")
+            return (nil, "Error reading file: \(error.localizedDescription)")
         }
     }
     
@@ -687,7 +687,7 @@ struct SystemFileManagerView: View {
             if showCopiedPathToast {
                 VStack {
                     Spacer()
-                    Text("路径已复制到剪贴板")
+                    Text("Path copied to clipboard")
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 8)
@@ -745,7 +745,7 @@ struct SystemFileManagerView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(ToolkitColors.accent)
                 
-                Text("系统文件管理器")
+                Text("System File Manager")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
             }
@@ -779,7 +779,7 @@ struct SystemFileManagerView: View {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
                     
-                    TextField("搜索文件...", text: $viewModel.searchText)
+                    TextField("Search files...", text: $viewModel.searchText)
                         .foregroundColor(.white)
                         .accentColor(ToolkitColors.accent)
                         .autocapitalization(.none)
@@ -820,7 +820,7 @@ struct SystemFileManagerView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 14))
-                            Text("返回")
+                            Text("Back")
                                 .font(.system(size: 14))
                         }
                         .foregroundColor(ToolkitColors.accent)
@@ -840,7 +840,7 @@ struct SystemFileManagerView: View {
                                 Text(String(component))
                                     .foregroundColor(.white)
                             } else if index == 0 {
-                                Text("根目录")
+                                Text("Root")
                                     .foregroundColor(.white)
                             }
                         }
@@ -851,29 +851,29 @@ struct SystemFileManagerView: View {
                 Spacer()
                 
                 Menu {
-                    Button("复制路径") {
+                    Button("Copy Path") {
                         UIPasteboard.general.string = viewModel.currentPath
                         withAnimation {
                             showCopiedPathToast = true
                         }
                     }
                     
-                    Button("跳转至根目录") {
+                    Button("Jump to Root") {
                         viewModel.navigationStack.removeAll()
                         viewModel.loadDirectory(path: "/")
                     }
                     
-                    Button("跳转至/System") {
+                    Button("Jump to /System") {
                         viewModel.navigationStack.removeAll()
                         viewModel.loadDirectory(path: "/System")
                     }
                     
-                    Button("跳转至Frameworks") {
+                    Button("Jump to Frameworks") {
                         viewModel.navigationStack.removeAll()
                         viewModel.loadDirectory(path: "/System/Library/Frameworks")
                     }
                     
-                    Button("跳转至Developer") {
+                    Button("Jump to Developer") {
                         viewModel.navigationStack.removeAll()
                         viewModel.loadDirectory(path: "/Developer")
                     }
@@ -900,7 +900,7 @@ struct SystemFileManagerView: View {
             ProgressView()
                 .scaleEffect(1.5)
                 .padding()
-            Text("正在加载文件...")
+            Text("Loading files...")
                 .foregroundColor(.white)
                 .font(.system(size: 16, weight: .medium))
             Spacer()
@@ -917,7 +917,7 @@ struct SystemFileManagerView: View {
                     .foregroundColor(.gray)
                     .padding()
                 
-                Text("此目录为空或我无法访问其内容。漏洞利用在这里帮不上忙。抱歉。")
+                Text("This directory is empty or I don't have access to its contents. The exploit is not helping me in this. Sorry.")
                     .foregroundColor(.white)
                     .font(.system(size: 16, weight: .medium))
             } else {
@@ -926,14 +926,14 @@ struct SystemFileManagerView: View {
                     .foregroundColor(.gray)
                     .padding()
                 
-                Text("没有匹配'\(viewModel.searchText)'的文件")
+                Text("No files match '\(viewModel.searchText)'")
                     .foregroundColor(.white)
                     .font(.system(size: 16, weight: .medium))
                 
                 Button(action: {
                     viewModel.searchText = ""
                 }) {
-                    Text("清除搜索")
+                    Text("Clear Search")
                         .foregroundColor(ToolkitColors.accent)
                         .padding(.top, 8)
                 }
@@ -978,7 +978,7 @@ struct SystemFileManagerView: View {
                         .lineLimit(1)
                     
                     HStack(spacing: 8) {
-                        Text(file.isDirectory ? "目录" : viewModel.detectFileType(for: file.path))
+                        Text(file.isDirectory ? "Directory" : viewModel.detectFileType(for: file.path))
                             .font(.system(size: 12))
                             .foregroundColor(.gray)
                         
@@ -1022,13 +1022,13 @@ struct SystemFileManagerView: View {
                     Button(action: {
                         showFileDetails = false
                     }) {
-                        Text("关闭")
+                        Text("Close")
                             .foregroundColor(ToolkitColors.accent)
                     }
                     
                     Spacer()
                     
-                    Text("文件详情")
+                    Text("File Details")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
                     
@@ -1042,7 +1042,7 @@ struct SystemFileManagerView: View {
                             }
                         }
                     }) {
-                        Text("复制路径")
+                        Text("Copy Path")
                             .foregroundColor(ToolkitColors.accent)
                     }
                 }
@@ -1063,7 +1063,7 @@ struct SystemFileManagerView: View {
                                         .font(.system(size: 20, weight: .semibold))
                                         .foregroundColor(.white)
                                     
-                                    Text(file.isDirectory ? "目录" : viewModel.detectFileType(for: file.path))
+                                    Text(file.isDirectory ? "Directory" : viewModel.detectFileType(for: file.path))
                                         .font(.system(size: 14))
                                         .foregroundColor(.gray)
                                 }
@@ -1074,23 +1074,23 @@ struct SystemFileManagerView: View {
                             .padding(.top, 16)
                             
                             VStack(alignment: .leading, spacing: 16) {
-                                detailRow(title: "路径", value: file.path)
+                                detailRow(title: "Path", value: file.path)
                                 
                                 if !file.isDirectory {
-                                    detailRow(title: "大小", value: viewModel.formattedFileSize(size: file.size))
+                                    detailRow(title: "Size", value: viewModel.formattedFileSize(size: file.size))
                                 }
                                 
                                 if let created = file.creationDate {
-                                    detailRow(title: "创建时间", value: dateFormatter.string(from: created))
+                                    detailRow(title: "Created", value: dateFormatter.string(from: created))
                                 }
                                 
                                 if let modified = file.modificationDate {
-                                    detailRow(title: "修改时间", value: dateFormatter.string(from: modified))
+                                    detailRow(title: "Modified", value: dateFormatter.string(from: modified))
                                 }
                                 
-                                detailRow(title: "所有者", value: file.owner)
-                                detailRow(title: "权限", value: file.permissions)
-                                detailRow(title: "类型", value: file.fileType)
+                                detailRow(title: "Owner", value: file.owner)
+                                detailRow(title: "Permissions", value: file.permissions)
+                                detailRow(title: "Type", value: file.fileType)
                             }
                             .padding(16)
                             .background(
@@ -1105,7 +1105,7 @@ struct SystemFileManagerView: View {
                                 }) {
                                     HStack {
                                         Image(systemName: "doc.text.magnifyingglass")
-                                        Text("打开文件")
+                                        Text("Open File")
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 14)
@@ -1140,7 +1140,7 @@ struct SystemFileManagerView: View {
                     Button(action: {
                         showFileContent = false
                     }) {
-                        Text("关闭")
+                        Text("Close")
                             .foregroundColor(ToolkitColors.accent)
                     }
                     
@@ -1163,7 +1163,7 @@ struct SystemFileManagerView: View {
                             }
                         }
                     }) {
-                        Text("复制路径")
+                        Text("Copy Path")
                             .foregroundColor(ToolkitColors.accent)
                     }
                 }
@@ -1186,13 +1186,13 @@ struct SystemFileManagerView: View {
                                             .scaledToFit()
                                             .padding()
                                         
-                                        Text("分辨率: \(Int(image.size.width)) × \(Int(image.size.height))")
+                                        Text("Resolution: \(Int(image.size.width)) × \(Int(image.size.height))")
                                             .font(.caption)
                                             .foregroundColor(.gray)
                                     }
                                 }
                             } else {
-                                errorView(message: "加载图片失败")
+                                errorView(message: "Failed to load image")
                             }
                         } else if !fileContent.isEmpty {
                             ScrollView {
@@ -1211,7 +1211,7 @@ struct SystemFileManagerView: View {
                                         .padding(16)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                 } else {
-                                    errorView(message: "生成十六进制转储失败")
+                                    errorView(message: "Failed to generate hex dump")
                                 }
                             }
                         } else if let error = fileError {
@@ -1224,7 +1224,7 @@ struct SystemFileManagerView: View {
             if showCopiedPathToast {
                 VStack {
                     Spacer()
-                    Text("路径已复制到剪贴板")
+                    Text("Path copied to clipboard")
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 8)
@@ -1283,7 +1283,7 @@ struct SystemFileManagerView: View {
             for (index, byte) in data.enumerated() {
                 let hex = String(format: "%02X ", byte)
                 line += hex
-            
+                
                 let char = (byte >= 32 && byte <= 126) ? String(format: "%c", byte) : "."
                 ascii += char
                 
@@ -1301,13 +1301,13 @@ struct SystemFileManagerView: View {
             }
         
             if fileSize > Int64(maxBytes) {
-                hexDump += "\n... (显示全部 \(fileSize) 字节中的前 \(maxBytes) 字节)"
+                hexDump += "\n... (showing first \(maxBytes) bytes of \(fileSize) total bytes)"
             }
             
             return hexDump
             
         } catch {
-            return "生成十六进制转储时出错: \(error.localizedDescription)"
+            return "Error generating hex dump: \(error.localizedDescription)"
         }
     }
     
@@ -1325,16 +1325,16 @@ struct SystemFileManagerView: View {
     
     private func createFileOptionsAlert() -> Alert {
         guard let file = selectedFile else {
-            return Alert(title: Text("错误"), message: Text("未选择文件"), dismissButton: .default(Text("确定")))
+            return Alert(title: Text("Error"), message: Text("No file selected"), dismissButton: .default(Text("OK")))
         }
         
         return Alert(
             title: Text(file.name),
-            message: Text("选择对此文件的操作"),
-            primaryButton: .default(Text("打开")) {
+            message: Text("Choose an action for this file"),
+            primaryButton: .default(Text("Open")) {
                 openFile(file: file)
             },
-            secondaryButton: .default(Text("查看详情")) {
+            secondaryButton: .default(Text("View Details")) {
                 showFileDetails = true
             }
         )
@@ -1453,13 +1453,13 @@ extension SystemFileManagerModel {
             }
             
             if fileSize > Int64(maxBytes) {
-                hexDump += "\n... (显示全部 \(fileSize) 字节中的前 \(maxBytes) 字节)"
+                hexDump += "\n... (showing first \(maxBytes) bytes of \(fileSize) total bytes)"
             }
             
             return hexDump
             
         } catch {
-            return "生成十六进制转储时出错: \(error.localizedDescription)"
+            return "Error generating hex dump: \(error.localizedDescription)"
         }
     }
     
@@ -1475,10 +1475,10 @@ extension SystemFileManagerModel {
                     return xmlString
                 }
             } catch {
-                return "处理plist时出错: \(error.localizedDescription)"
+                return "Error processing plist: \(error.localizedDescription)"
             }
         } catch {
-            return "读取文件出错: \(error.localizedDescription)"
+            return "Error reading file: \(error.localizedDescription)"
         }
         
         return nil
