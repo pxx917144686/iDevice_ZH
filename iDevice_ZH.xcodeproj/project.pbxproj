@@ -291,7 +291,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.pxx917144686.toolkit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/geosn0w/Desktop/iDevice_ZH/iDevice_ZH/iDevice_ZH-Bridge-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/iDevice_ZH/iDevice_ZH-Bridge-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -325,7 +325,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.pxx917144686.toolkit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "/Users/pxx917144686/Desktop/iDevice_ZH/iDevice_ZH/iDevice_ZH-Bridge-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/iDevice_ZH/iDevice_ZH-Bridge-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
