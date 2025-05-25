@@ -48,25 +48,13 @@ jobs:
         # 准备Info.plist文件
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
-        # 检查当前Info.plist引用
-        echo "当前project.pbxproj中的Info.plist引用:"
-        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "没有找到Info.plist引用"
-        
         # 使用更精确的方式修复Info.plist重复问题
-        # 1. 找到包含Info.plist的行
-        # 2. 确定是否有多个INFOPLIST_FILE定义
-        INFOPLIST_ENTRIES=$(grep -n "INFOPLIST_FILE" iDevice_ZH.xcodeproj/project.pbxproj || echo "")
+        # 删除所有现有的INFOPLIST_FILE条目
+        grep -v "INFOPLIST_FILE" iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
+        mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
         
-        if [ ! -z "$INFOPLIST_ENTRIES" ]; then
-          echo "找到多个INFOPLIST_FILE条目，将保留一个并移除其他..."
-          # 创建一个临时文件来处理project.pbxproj
-          sed -E '/INFOPLIST_FILE = ".*Info\.plist";/ d' iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
-          mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
-          
-          # 添加正确的Info.plist引用
-          sed -i '' '/PRODUCT_BUNDLE_IDENTIFIER/a\\
-          \t\t\t\tINFOPLIST_FILE = "iDevice_ZH/Info.plist";' iDevice_ZH.xcodeproj/project.pbxproj
-        fi
+        # 使用perl添加新的INFOPLIST_FILE引用
+        perl -i -pe 's/(PRODUCT_BUNDLE_IDENTIFIER = .*?;)/\1\n\t\t\t\tINFOPLIST_FILE = "iDevice_ZH\/Info.plist";/g' iDevice_ZH.xcodeproj/project.pbxproj
         
         # 检查是否有其他Info.plist的复制构建阶段
         COPY_PHASE=$(grep -n "Copy Bundle Resources.*Info.plist" -A 10 iDevice_ZH.xcodeproj/project.pbxproj || echo "")
@@ -140,20 +128,12 @@ jobs:
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
         # 使用更精确的方式修复Info.plist重复问题
-        # 1. 找到包含Info.plist的行
-        # 2. 确定是否有多个INFOPLIST_FILE定义
-        INFOPLIST_ENTRIES=$(grep -n "INFOPLIST_FILE" iDevice_ZH.xcodeproj/project.pbxproj || echo "")
+        # 删除所有现有的INFOPLIST_FILE条目
+        grep -v "INFOPLIST_FILE" iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
+        mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
         
-        if [ ! -z "$INFOPLIST_ENTRIES" ]; then
-          echo "找到多个INFOPLIST_FILE条目，将保留一个并移除其他..."
-          # 创建一个临时文件来处理project.pbxproj
-          sed -E '/INFOPLIST_FILE = ".*Info\.plist";/ d' iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
-          mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
-          
-          # 添加正确的Info.plist引用
-          sed -i '' '/PRODUCT_BUNDLE_IDENTIFIER/a\\
-          \t\t\t\tINFOPLIST_FILE = "iDevice_ZH/Info.plist";' iDevice_ZH.xcodeproj/project.pbxproj
-        fi
+        # 使用perl添加新的INFOPLIST_FILE引用
+        perl -i -pe 's/(PRODUCT_BUNDLE_IDENTIFIER = .*?;)/\1\n\t\t\t\tINFOPLIST_FILE = "iDevice_ZH\/Info.plist";/g' iDevice_ZH.xcodeproj/project.pbxproj
         
         # 检查是否有其他Info.plist的复制构建阶段
         COPY_PHASE=$(grep -n "Copy Bundle Resources.*Info.plist" -A 10 iDevice_ZH.xcodeproj/project.pbxproj || echo "")
