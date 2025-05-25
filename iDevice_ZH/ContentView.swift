@@ -1045,7 +1045,7 @@ struct ContentView: View {
     struct JailbreakNewsButton: View {
         var body: some View {
             Button(action: {
-                if let url = URL(string: "https://idevicecentral.com") {
+                if let url = URL(string: "https://raw.githubusercontent.com/pxx917144686/iDevice_ZH/refs/heads/main/VM_BEHAVIOR_ZERO_WIRED_PAGES.c") {
                     UIApplication.shared.open(url)
                 }
             }) {
@@ -1055,7 +1055,7 @@ struct ContentView: View {
                         .foregroundColor(ToolkitColors.green)
                         .frame(width: 26)
                     
-                    Text("iOS越狱新闻")
+                    Text("CVE-2025-24203 漏洞")
                         .font(.system(size: 16, weight: .semibold))
                     
                     Spacer()
@@ -1119,7 +1119,7 @@ struct ContentView: View {
                 }
             VStack(spacing: 0) {
                 HStack {
-                    Text("关于 iDevice 工具箱")
+                    Text("关于 iDevice")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
                     
@@ -1141,17 +1141,17 @@ struct ContentView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("iDevice 工具箱")
+                        Text("iDevice_ZH")
                             .font(.system(size: 24, weight: .bold))
                             .foregroundColor(ToolkitColors.accent)
                         
-                        Text("用于自定义iOS设备的高级工具集")
+                        Text("iOS工具")
                             .font(.system(size: 16))
                             .foregroundColor(.white.opacity(0.9))
                             .fixedSize(horizontal: false, vertical: true)
                         
                         Group {
-                            Text("由 [iDevice Central](https://idevicecentral.com) 制作")
+                            Text("由 [pxx917144686](https://github.com/pxx917144686/iDevice_ZH) 修改")
                                 .font(.system(size: 16))
                                 .foregroundColor(.white.opacity(0.9))
                                 .fixedSize(horizontal: false, vertical: true)
