@@ -1037,4 +1037,3 @@ struct JSONFile: FileDocument {
         return FileWrapper(regularFileWithContents: data)
     }
 }
-}
