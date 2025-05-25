@@ -7,7 +7,7 @@
       "/System/Library/PrivateFrameworks/CoreMaterial.framework/dockLight.materialrecipe"
     ],
     "description": "完全移除主屏幕Dock栏背景。调整由@Skadz108提供。",
-    "category": "美观"
+    "category": "美化"
   },
   {
     "icon": "line.3.horizontal",
@@ -16,7 +16,7 @@
       "/System/Library/PrivateFrameworks/MaterialKit.framework/Assets.car"
     ],
     "description": "移除底部主页指示条。调整由@Skadz108提供。",
-    "category": "美观"
+    "category": "美化"
   },
   {
     "icon": "folder",
@@ -26,7 +26,7 @@
       "/System/Library/PrivateFrameworks/SpringBoardHome.framework/folderLight.materialrecipe"
     ],
     "description": "使应用文件夹完全透明。调整由@Skadz108提供。",
-    "category": "美观"
+    "category": "美化"
   },
   {
     "icon": "lock.iphone",
@@ -35,7 +35,7 @@
       "/System/Library/PrivateFrameworks/CoverSheet.framework/dashBoardPasscodeBackground.materialrecipe"
     ],
     "description": "移除锁屏界面密码输入背景",
-    "category": "美观"
+    "category": "美化"
   },
   {
     "icon": "bubble.left",
@@ -59,7 +59,7 @@
       "/System/Library/PrivateFrameworks/CoreMaterial.framework/platters.materialrecipe"
     ],
     "description": "透明媒体播放器和通知。调整由@straight_tamago / mdc0提供",
-    "category": "美观"
+    "category": "美化"
   },
   {
     "icon": "textformat",
@@ -75,7 +75,7 @@
       "/System/Library/Fonts/CoreUI/SFUISoft.ttf"
     ],
     "description": "将界面完全切换至Helvetica字体。调整由GeoSn0w提供。这个想法来源于jailbreak.party Discord频道。",
-    "category": "美观"
+    "category": "美化"
   },
   {
     "icon": "face.dashed.fill",
@@ -84,7 +84,7 @@
       "/System/Library/Fonts/CoreAddition/AppleColorEmoji-160px.ttc"
     ],
     "description": "完全禁用所有表情符号。调整由GeoSn0w提供。",
-    "category": "美观"
+    "category": "美化"
   },
   {
     "icon": "eye.slash.fill",
@@ -93,7 +93,7 @@
       "/System/Library/PrivateFrameworks/CoreMaterial.framework/modulesBackground.materialrecipe"
     ],
     "description": "完全禁用控制中心的模糊效果。",
-    "category": "美观"
+    "category": "美化"
   },
   {
     "icon": "eye.slash.fill",
