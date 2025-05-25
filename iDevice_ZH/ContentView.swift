@@ -719,38 +719,37 @@ struct ContentView: View {
     }
     
     private func loadTweaks() {
-        isLoadingTweaks = true
-        tweakLoadError = nil
-        
-        DispatchQueue.global(qos: .userInitiated).async {
-            TweaksService.shared.loadTweaks()
-                .sink(
-                    receiveCompletion: { completion in
-                        DispatchQueue.main.async {
-                            self.isLoadingTweaks = false
-                            
-                            if case .failure(let error) = completion {
-                                iDeviceLogger("[!] 加载调整失败: \(error.localizedDescription)")
-                                self.tweakLoadError = error.localizedDescription
-                                print("[!] 加载调整失败: \(error.localizedDescription)")
-                                self.tweakLoadError = error.localizedDescription
+            isLoadingTweaks = true
+            tweakLoadError = nil
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                TweaksService.shared.loadTweaks()
+                    .sink(
+                        receiveCompletion: { completion in
+                            DispatchQueue.main.async {
+                                self.isLoadingTweaks = false
+                                
+                                if case .failure(let error) = completion {
+                                    iDeviceLogger("[!] 加载调整失败: \(error.localizedDescription)")
+                                    self.tweakLoadError = error.localizedDescription
+                                    print("[!] 加载调整失败: \(error.localizedDescription)")
+                                    self.tweakLoadError = error.localizedDescription
+                                }
                             }
-                        }
-                    },
-                    receiveValue: { loadedTweaks in
-                        DispatchQueue.main.async {
-                            self.tweaks = loadedTweaks
-                            print("[+] 成功加载 \(loadedTweaks.count) 个调整")
-                            if !loadedTweaks.isEmpty {
-                                let categories = Dictionary(grouping: loadedTweaks) { $0.category }
-                                for (category, tweaks) in categories {
-                                    iDeviceLogger("   • \(category.rawValue): \(tweaks.count) 个调整")
+                        },
+                        receiveValue: { loadedTweaks in
+                            DispatchQueue.main.async {
+                                self.tweaks = loadedTweaks
+                                print("[+] 成功加载 \(loadedTweaks.count) tweaks")
+                                if !loadedTweaks.isEmpty {
+                                    let categories = Dictionary(grouping: loadedTweaks) { $0.category }
+                                    for (category, tweaks) in categories {
+                                        iDeviceLogger("   • \(category.rawValue): \(tweaks.count) tweaks")
                                 }
                             }
                         }
                     }
-                }
-            )
+                )
             .store(in: &self.cancellableStore.cancellables)
         }
     }
