@@ -15,8 +15,8 @@ class TerminalLogger: ObservableObject {
     @Published var entries: [String] = []
     
     private init() {
-        entries.append("iDevice Central 终端已初始化！")
-        entries.append("iDevice 工具箱 by GeoSn0w (@FCE365)")
+        entries.append("iDevice Central Terminal initialized!")
+        entries.append("iDevice ToolKit by GeoSn0w (@FCE365)")
     }
     
     func log(_ message: String) {
@@ -27,7 +27,7 @@ class TerminalLogger: ObservableObject {
     
     func clear() {
         DispatchQueue.main.async {
-            self.entries = ["终端已清除"]
+            self.entries = ["Terminal cleared"]
         }
     }
 }
