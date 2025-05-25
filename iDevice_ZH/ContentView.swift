@@ -44,11 +44,11 @@ extension TweakPathForFile {
 }
 
 enum TweakCategory: String, Codable, CaseIterable {
-    case aesthetics = "外观"
+    case aesthetics = "美观"
     case performance = "性能"
     case privacy = "隐私"
-    case experimental = "测试"
-    case custom = "自定义补丁"
+    case experimental = "调整"
+    case custom = "自定义"
 }
 
 // Helper extensions
@@ -118,7 +118,7 @@ struct CustomTweaksCategoryButton: View {
                     .foregroundColor(ToolkitColors.green)
                     .frame(width: 26)
                 
-                Text("创建自定义补丁")
+                Text("创建自定义调整")
                     .font(.system(size: 16, weight: .semibold))
                 
                 Spacer()
@@ -291,8 +291,8 @@ struct StepProgressView: View {
     private func getStepName(_ step: Int) -> String {
         switch step {
         case 0: return "开始"
-        case 1: return "利用漏洞"
-        case 2: return "调整补丁"
+        case 1: return "漏洞利用"
+        case 2: return "Tweak"
         case 3: return "完成"
         default: return "步骤 \(step + 1)"
         }
@@ -501,8 +501,8 @@ struct TweakRowView: View {
         }
         .alert(isPresented: $showDeleteConfirmation) {
             Alert(
-                title: Text("删除自定义补丁"),
-                message: Text("确定要删除 \"\(tweak.name)\" 吗？此操作无法撤销。"),
+                title: Text("删除自定义调整"),
+                message: Text("您确定要删除\"\(tweak.name)\"吗？此操作无法撤销。"),
                 primaryButton: .destructive(Text("删除")) {
                     if let delete = deleteAction {
                         delete()
@@ -613,7 +613,7 @@ struct ContentView: View {
     let device = Device.current
     @AppStorage("enabledTweaks") private var enabledTweakIds: [String] = []
     @State private var progressStep: Int = 0
-    @State private var progressText: String = "系统兼容"
+    @State private var progressText: String = "准备就绪"
     @State private var showLogs: Bool = false
     @State private var hasError: Bool = false
     @State private var categoryExpanded: [TweakCategory: Bool] = Dictionary(uniqueKeysWithValues: TweakCategory.allCases.map { ($0, false) })
@@ -647,13 +647,13 @@ struct ContentView: View {
         return categories
     }
     
-    // MARK: Body
+    // MARK: 正文
     var body: some View {
         mainView
             .onAppear {
-                print("iDevice Toolkit\n[*] 检测到设备  \(device.systemName!) \(device.systemVersion!), \(device.description)")
+                print("iDevice 工具包\n[*] 检测到设备  \(device.systemName!) \(device.systemVersion!), \(device.description)")
                 checkVersionCompatibility()
-                iDeviceLogger("[i] iDevice Central: 终端会话已开始")
+                iDeviceLogger("[i] iDevice Central: 终端会话已启动")
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     updateService.checkForUpdates()
@@ -719,39 +719,40 @@ struct ContentView: View {
     }
     
     private func loadTweaks() {
-            isLoadingTweaks = true
-            tweakLoadError = nil
-            
-            DispatchQueue.global(qos: .userInitiated).async {
-                TweaksService.shared.loadTweaks()
-                    .sink(
-                        receiveCompletion: { completion in
-                            DispatchQueue.main.async {
-                                self.isLoadingTweaks = false
-                                
-                                if case .failure(let error) = completion {
-                                    iDeviceLogger("[!] 加载补丁失败: \(error.localizedDescription)")
-                                    self.tweakLoadError = error.localizedDescription
-                                    print("[!] 加载补丁失败: \(error.localizedDescription)")
-                                    self.tweakLoadError = error.localizedDescription
-                                }
+        isLoadingTweaks = true
+        tweakLoadError = nil
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            TweaksService.shared.loadTweaks()
+                .sink(
+                    receiveCompletion: { completion in
+                        DispatchQueue.main.async {
+                            self.isLoadingTweaks = false
+                            
+                            if case .failure(let error) = completion {
+                                iDeviceLogger("[!] 加载调整失败: \(error.localizedDescription)")
+                                self.tweakLoadError = error.localizedDescription
+                                print("[!] 加载调整失败: \(error.localizedDescription)")
+                                self.tweakLoadError = error.localizedDescription
                             }
-                        },
-                        receiveValue: { loadedTweaks in
-                            DispatchQueue.main.async {
-                                self.tweaks = loadedTweaks
-                                print("[+] 成功加载 \(loadedTweaks.count) 个补丁")
-                                if !loadedTweaks.isEmpty {
-                                    let categories = Dictionary(grouping: loadedTweaks) { $0.category }
-                                    for (category, tweaks) in categories {
-                                        iDeviceLogger("   • \(category.rawValue): \(tweaks.count) 个补丁")
+                        }
+                    },
+                    receiveValue: { loadedTweaks in
+                        DispatchQueue.main.async {
+                            self.tweaks = loadedTweaks
+                            print("[+] 成功加载 \(loadedTweaks.count) 个调整")
+                            if !loadedTweaks.isEmpty {
+                                let categories = Dictionary(grouping: loadedTweaks) { $0.category }
+                                for (category, tweaks) in categories {
+                                    iDeviceLogger("   • \(category.rawValue): \(tweaks.count) 个调整")
                                 }
                             }
                         }
                     }
-                )
-                .store(in: &self.cancellableStore.cancellables)
-            }
+                }
+            )
+            .store(in: &self.cancellableStore.cancellables)
+        }
     }
     
     private var mainView: some View {
@@ -793,10 +794,10 @@ struct ContentView: View {
             ProgressView()
                 .scaleEffect(1.5)
                 .padding()
-            Text("正在加载补丁...")
+            Text("正在加载调整...")
                 .foregroundColor(.white)
                 .font(.system(size: 16, weight: .medium))
-            Text("这可能需要一点时间")
+            Text("可能需要一点时间")
                 .foregroundColor(.gray)
                 .font(.system(size: 14))
                 .padding(.top, 4)
@@ -811,7 +812,7 @@ struct ContentView: View {
                 .font(.system(size: 40))
                 .foregroundColor(.yellow)
             
-            Text("加载补丁失败")
+            Text("加载调整失败")
                 .font(.title3)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
@@ -858,7 +859,7 @@ struct ContentView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(ToolkitColors.accent)
                 
-                Text("iDevice_ZH")
+                Text("iDevice Toolkit")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
             }
@@ -933,7 +934,7 @@ struct ContentView: View {
                         .opacity(progressStep > 0 || !isVersionCompatible ? 1.0 : 0.0)
                 }
                 
-                Text(!isVersionCompatible ? "不兼容" : (progressStep > 0 ? "活动中" : "系统兼容"))
+                Text(!isVersionCompatible ? "不兼容" : (progressStep > 0 ? "激活中" : "准备就绪"))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(!isVersionCompatible ? Color.red : (progressStep > 0 ? ToolkitColors.green : .gray))
             }
@@ -959,16 +960,16 @@ struct ContentView: View {
     
     private var tweaksSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("可用补丁")
+            Text("可用调整")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(.white)
                 .padding(.horizontal, 6)
             
             ForEach(TweakCategory.allCases, id: \.self) { category in
-                if category != .custom {
+                if let categoryTweaks = tweaksByCategory[category], !categoryTweaks.isEmpty {
                     TweakCategoryView(
                         category: category,
-                        tweaks: tweaksByCategory[category] ?? [],
+                        tweaks: categoryTweaks,
                         isExpanded: .init(
                             get: { categoryExpanded[category] ?? false },
                             set: { categoryExpanded[category] = $0 }
@@ -1021,11 +1022,11 @@ struct ContentView: View {
                 .padding(.top, 2)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("怎么恢复？")
+                Text("如何恢复调整")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
                 
-                Text("👉 重启 恢复")
+                Text("所有调整都直接应用于内存而非持久性存储。如果遇到任何问题或想要恢复到默认设置，只需重启设备即可清除内存中的所有调整。")
                     .font(.system(size: 14))
                     .foregroundColor(.white.opacity(0.8))
                     .fixedSize(horizontal: false, vertical: true)
@@ -1041,13 +1042,47 @@ struct ContentView: View {
                 )
         )
     }
-        
+    
+    struct JailbreakNewsButton: View {
+        var body: some View {
+            Button(action: {
+                if let url = URL(string: "https://raw.githubusercontent.com/pxx917144686/iDevice_ZH/refs/heads/main/VM_BEHAVIOR_ZERO_WIRED_PAGES.c") {
+                    UIApplication.shared.open(url)
+                }
+            }) {
+                HStack {
+                    Image(systemName: "newspaper.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(ToolkitColors.green)
+                        .frame(width: 26)
+                    
+                    Text("关于漏洞CVE-2025-24203")
+                        .font(.system(size: 16, weight: .semibold))
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.gray)
+                        .padding(.leading, 8)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(ToolkitColors.categoryHeaderBackground)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+        }
+    }
+    
     private func applyButtonView(scrollProxy: ScrollViewProxy) -> some View {
         VStack(spacing: 12) {
             ToolkitButton(
                 icon: tweaksAppliedSuccessfully ? "arrow.clockwise" : "bolt.fill",
-                text: tweaksAppliedSuccessfully ? "重新启动以应用" :
-                    (progressStep > 0 ? "取消操作" : "执行"),
+                text: tweaksAppliedSuccessfully ? "重新加载以应用" :
+                    (progressStep > 0 ? "取消操作" : "应用调整"),
                 disabled: !hasEnabledTweaks && progressStep == 0 && !tweaksAppliedSuccessfully || !isVersionCompatible
             ) {
                 if progressStep > 0 {
@@ -1085,7 +1120,7 @@ struct ContentView: View {
                 }
             VStack(spacing: 0) {
                 HStack {
-                    Text("关于iDevice_ZH")
+                    Text("关于 iDevice 工具")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
                     
@@ -1111,26 +1146,26 @@ struct ContentView: View {
                             .font(.system(size: 24, weight: .bold))
                             .foregroundColor(ToolkitColors.accent)
                         
-                        Text("一个用于自定义iOS设备的高级工具集")
+                        Text("iOS工具")
                             .font(.system(size: 16))
                             .foregroundColor(.white.opacity(0.9))
                             .fixedSize(horizontal: false, vertical: true)
                         
                         Group {
-                            Text("由[pxx917144686](https://github.com/pxx917144686/iDevice_ZH)修改")
+                            Text("由 [pxx917144686](https://github.com/pxx917144686/iDevice_ZH) 修改")
                                 .font(.system(size: 16))
                                 .foregroundColor(.white.opacity(0.9))
                                 .fixedSize(horizontal: false, vertical: true)
                                 .tint(ToolkitColors.accent)
                             
-                            Text("• [原开发者GeoSn0w的Twitter](https://twitter.com/FCE365)")
+                            Text("• [GeoSn0w 的 Twitter](https://twitter.com/FCE365)")
                                 .font(.system(size: 14))
                                 .foregroundColor(.white.opacity(0.8))
                                 .fixedSize(horizontal: false, vertical: true)
                                 .tint(ToolkitColors.accent)
                                 .padding(.top, 4)
                             
-                            Text("• [iDevice Central的YouTube](https://youtube.com/@idevicecentral)")
+                            Text("• [iDevice Central 的 YouTube](https://youtube.com/@idevicecentral)")
                                 .font(.system(size: 14))
                                 .foregroundColor(.white.opacity(0.8))
                                 .fixedSize(horizontal: false, vertical: true)
@@ -1142,12 +1177,12 @@ struct ContentView: View {
                             .padding(.vertical, 4)
                         
                         Group {
-                            Text("• 所有补丁都通过修改RAM实现，所以如果出现任何问题，你可以重启设备来清除所有补丁并恢复出厂设置。")
+                            Text("• 重启 👉 恢复。")
                                 .font(.system(size: 14))
                                 .foregroundColor(.white.opacity(0.8))
                                 .fixedSize(horizontal: false, vertical: true)
                             
-                            Text("• 漏洞利用由Google Project Zero的Ian Beer开发")
+                            Text("• 漏洞利用由Google Project Zero的Ian Beer发现")
                                 .font(.system(size: 14))
                                 .foregroundColor(.white.opacity(0.8))
                                 .fixedSize(horizontal: false, vertical: true)
@@ -1159,24 +1194,24 @@ struct ContentView: View {
                             .padding(.vertical, 8)
                         
                         Group {
-                            Text("**致谢**")
+                            Text("**致谢名单**")
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white.opacity(0.9))
                                 .padding(.bottom, 4)
                             
-                            Text("• 感谢[jailbreak.party](https://github.com/jailbreakdotparty)的dirtyZero项目提供原始灵感、代码和补丁路径")
+                            Text("• 感谢 [jailbreak.party](https://github.com/jailbreakdotparty) 的dirtyZero项目提供原始灵感、代码和调整路径")
                                 .font(.system(size: 14))
                                 .foregroundColor(.white.opacity(0.8))
                                 .fixedSize(horizontal: false, vertical: true)
                                 .tint(ToolkitColors.accent)
                             
-                            Text("• 感谢[straight_tamago](https://twitter.com/straight_tamago)的mdc0项目提供原始灵感、代码和补丁路径")
+                            Text("• 感谢 [straight_tamago](https://twitter.com/straight_tamago) 的mdc0项目提供原始灵感、代码和调整路径")
                                 .font(.system(size: 14))
                                 .foregroundColor(.white.opacity(0.8))
                                 .fixedSize(horizontal: false, vertical: true)
                                 .tint(ToolkitColors.accent)
                             
-                            Text("• 特别感谢Ian Beer提供CVE-2025-24203漏洞([查看详情](https://project-zero.issues.chromium.org/issues/391518636))")
+                            Text("• 特别感谢Ian Beer发现CVE-2025-24203漏洞 ([查看详情](https://project-zero.issues.chromium.org/issues/391518636))")
                                 .font(.system(size: 14))
                                 .foregroundColor(.white.opacity(0.8))
                                 .fixedSize(horizontal: false, vertical: true)
@@ -1205,7 +1240,7 @@ struct ContentView: View {
         guard !enabledTweaks.isEmpty else { return }
         hasError = false
         
-        iDeviceLogger("[*] 开始操作，已启用 \(enabledTweaks.count) 个补丁")
+        iDeviceLogger("[*] 开始操作，已启用 \(enabledTweaks.count) 个调整")
         
         withAnimation {
             progressStep = 1
@@ -1215,25 +1250,25 @@ struct ContentView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             withAnimation {
                 progressStep = 2
-                progressText = "正在应用 \(self.enabledTweaks.count) 个补丁..."
+                progressText = "正在应用 \(self.enabledTweaks.count) 个调整..."
                 
-                var applyingString = "[+] 应用已选择的补丁: "
+                var applyingString = "[+] 正在应用选定的调整: "
                 let tweakNames = self.enabledTweaks.map { $0.name }.joined(separator: ", ")
                 applyingString += tweakNames
                 iDeviceLogger(applyingString)
                 
-                iDeviceLogger("\n[*] 详细补丁信息:")
+                iDeviceLogger("\n[*] 调整详细信息:")
                 for (index, tweak) in self.enabledTweaks.enumerated() {
-                    iDeviceLogger("\n[\(index + 1)/\(self.enabledTweaks.count)] 补丁: \(tweak.name)")
+                    iDeviceLogger("\n[\(index + 1)/\(self.enabledTweaks.count)] 调整: \(tweak.name)")
                     
-                    iDeviceLogger("    • 要修改的路径:")
+                    iDeviceLogger("    • 需要修改的路径:")
                     
                     for (pathIndex, path) in tweak.paths.enumerated() {
                         iDeviceLogger("      \(pathIndex + 1). \(path)")
                     }
                 }
                 
-                iDeviceLogger("\n[*] 开始应用补丁流程...")
+                iDeviceLogger("\n[*] 开始调整应用过程...")
             }
             
             let stats = TweakStats()
@@ -1242,8 +1277,8 @@ struct ContentView: View {
                 self.proceedToVerification(successCount: stats.successCount, failedCount: stats.failedCount)
                 withAnimation {
                     showTerminalLog.toggle()
-                    
-                }}
+                }
+            }
         }
     }
     
@@ -1263,19 +1298,19 @@ struct ContentView: View {
     
     private func processTweaks(tweaks: [TweakPathForFile], index: Int, stats: TweakStats, completion: @escaping () -> Void) {
         guard index < tweaks.count else {
-            iDeviceLogger("\n[*] iDevice 工具箱补丁日志")
+            iDeviceLogger("\n[*] iDevice 工具包调整日志")
             if stats.successCount > 0 {
-                iDeviceLogger("[✓] \(stats.successCount) 个补丁成功应用")
+                iDeviceLogger("[✓] \(stats.successCount) 个调整应用成功")
             }
             if stats.failedCount > 0 {
-                iDeviceLogger("[✗] \(stats.failedCount) 个补丁应用失败")
+                iDeviceLogger("[✗] \(stats.failedCount) 个调整应用失败")
             }
             completion()
             return
         }
         
         let tweak = tweaks[index]
-        iDeviceLogger("\n[*] 处理补丁 [\(index + 1)/\(tweaks.count)]: \(tweak.name)")
+        iDeviceLogger("\n[*] 处理调整 [\(index + 1)/\(tweaks.count)]: \(tweak.name)")
         
         let pathStats = TweakStats()
         
@@ -1284,11 +1319,11 @@ struct ContentView: View {
             
             if pathStats.pathsFailed == 0 {
                 stats.successCount += 1
-                iDeviceLogger("✅ 补丁状态: \(tweak.name) - 应用成功")
+                iDeviceLogger("✅ 调整状态: \(tweak.name) - 应用成功")
                 iDeviceLogger("   • 所有 \(pathStats.pathsSucceeded) 个路径修改成功")
             } else if pathStats.pathsSucceeded > 0 {
                 stats.failedCount += 1
-                iDeviceLogger("⚠️ 补丁状态: \(tweak.name) - 部分应用")
+                iDeviceLogger("⚠️ 调整状态: \(tweak.name) - 部分应用")
                 iDeviceLogger("   • \(pathStats.pathsSucceeded) 个路径成功")
                 iDeviceLogger("   • \(pathStats.pathsFailed) 个路径失败")
                 
@@ -1301,7 +1336,7 @@ struct ContentView: View {
                 }
             } else {
                 stats.failedCount += 1
-                iDeviceLogger("❌ 补丁状态: \(tweak.name) - 失败")
+                iDeviceLogger("❌ 调整状态: \(tweak.name) - 失败")
                 iDeviceLogger("   • 所有 \(pathStats.pathsFailed) 个路径应用失败")
                 
                 if !pathStats.pathFailures.isEmpty {
@@ -1322,20 +1357,20 @@ struct ContentView: View {
     
     private func processPaths(tweak: TweakPathForFile, pathIndex: Int, pathStats: TweakStats, completion: @escaping () -> Void) {
         guard pathIndex < tweak.paths.count else {
-            iDeviceLogger("[*] 已完成处理 \(tweak.name) 的所有路径")
+            iDeviceLogger("[*] 完成处理 \(tweak.name) 的所有路径")
             completion()
             return
         }
         
         let path = tweak.paths[pathIndex]
         
-        iDeviceLogger("[>] 补丁 \(tweak.name): 处理路径 [\(pathIndex + 1)/\(tweak.paths.count)]: \(path)")
+        iDeviceLogger("[>] 调整 \(tweak.name): 处理路径 [\(pathIndex + 1)/\(tweak.paths.count)]: \(path)")
         
         do {
             let errorReason = try runExploitForPath(path: path)
             if errorReason == nil {
                 pathStats.pathsSucceeded += 1
-                iDeviceLogger("[+] 成功利用路径: \(path)")
+                iDeviceLogger("[+] 路径漏洞利用成功: \(path)")
             } else if let reason = errorReason {
                 pathStats.addFailedPath(path: path, reason: reason)
                 iDeviceLogger("[!] 应用路径时出错: \(path)")
@@ -1366,41 +1401,41 @@ struct ContentView: View {
                 progressStep = 3
                 progressText = "正在验证更改..."
                 
-                iDeviceLogger("\n[*] 验证补丁应用结果")
+                iDeviceLogger("\n[*] 验证调整应用结果")
                 
                 self.hasError = successCount == 0 && failedCount > 0
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     withAnimation {
                         iDeviceLogger("\n================================================")
-                        iDeviceLogger("                最终操作结果                    ")
+                        iDeviceLogger("                最终操作结果                     ")
                         iDeviceLogger("================================================")
                         
                         if failedCount == 0 {
-                            progressText = "补丁应用成功！"
-                            iDeviceLogger("✅ 成功: 所有 \(successCount) 个补丁应用成功！")
+                            progressText = "调整应用成功！"
+                            iDeviceLogger("✅ 成功: 所有 \(successCount) 个调整应用成功！")
                             tweaksAppliedSuccessfully = true
                             progressStep = 0
                         } else if successCount > 0 {
-                            progressText = "\(successCount) 个补丁已应用，\(failedCount) 个失败"
-                            iDeviceLogger("⚠️ 部分成功: \(successCount) 个补丁已应用，\(failedCount) 个失败")
+                            progressText = "\(successCount) 个调整已应用，\(failedCount) 个失败"
+                            iDeviceLogger("⚠️ 部分成功: \(successCount) 个调整应用成功，\(failedCount) 个失败")
                             tweaksAppliedSuccessfully = successCount > 0
                             progressStep = 0
                         } else {
-                            progressText = "无法应用任何补丁"
-                            iDeviceLogger("❌ 失败: 无法应用任何补丁")
+                            progressText = "无法应用任何调整"
+                            iDeviceLogger("❌ 失败: 无法应用任何调整")
                             self.hasError = true
                             tweaksAppliedSuccessfully = false
                         }
                         
                         if tweaksAppliedSuccessfully {
                             iDeviceLogger("\n[*] 下一步:")
-                            iDeviceLogger("   1. 重启你的设备以应用更改")
-                            iDeviceLogger("   2. 前往设置 > 显示与亮度")
-                            iDeviceLogger("   3. 点击显示缩放并切换视图以触发重启")
+                            iDeviceLogger("   1. 重新加载设备以应用更改")
+                            iDeviceLogger("   2. 前往 设置 > 显示与亮度")
+                            iDeviceLogger("   3. 点击显示缩放并切换视图以触发重新加载")
                         } else {
                             iDeviceLogger("\n[*] 下一步:")
-                            iDeviceLogger("   • 尝试使用不同的补丁或检查设备兼容性")
+                            iDeviceLogger("   • 尝试使用不同的调整或检查设备兼容性")
                         }
                         
                         let dateFormatter = DateFormatter()
@@ -1427,7 +1462,7 @@ struct ContentView: View {
             
             VStack(spacing: 0) {
                 HStack {
-                    Text("需要重新启动")
+                    Text("需要重新加载")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
                     
@@ -1450,13 +1485,13 @@ struct ContentView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("由于漏洞利用限制，你需要手动重启设备才能使补丁生效。")
+                        Text("由于漏洞利用的限制，您需要手动重新加载设备以使调整生效。")
                             .font(.system(size: 16))
                             .foregroundColor(.white)
                             .padding(.bottom, 4)
                             .fixedSize(horizontal: false, vertical: true)
                         
-                        Text("操作指南:")
+                        Text("操作说明:")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(ToolkitColors.accent)
                         
@@ -1465,7 +1500,7 @@ struct ContentView: View {
                                 Text("1.")
                                     .foregroundColor(.white)
                                     .frame(width: 20, alignment: .leading)
-                                Text("前往设置 > 显示与亮度")
+                                Text("前往 设置 > 显示与亮度")
                                     .foregroundColor(.white)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
@@ -1474,7 +1509,7 @@ struct ContentView: View {
                                 Text("2.")
                                     .foregroundColor(.white)
                                     .frame(width: 20, alignment: .leading)
-                                Text("向下滚动到显示缩放")
+                                Text("向下滚动至显示缩放")
                                     .foregroundColor(.white)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
@@ -1483,7 +1518,7 @@ struct ContentView: View {
                                 Text("3.")
                                     .foregroundColor(.white)
                                     .frame(width: 20, alignment: .leading)
-                                Text("在默认和较大文本选项之间切换")
+                                Text("在默认和放大文字选项之间切换")
                                     .foregroundColor(.white)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
@@ -1492,7 +1527,7 @@ struct ContentView: View {
                                 Text("4.")
                                     .foregroundColor(.white)
                                     .frame(width: 20, alignment: .leading)
-                                Text("设备重启")
+                                Text("这将触发重新加载")
                                     .foregroundColor(.white)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
@@ -1501,7 +1536,7 @@ struct ContentView: View {
                                 Text("5.")
                                     .foregroundColor(.white)
                                     .frame(width: 20, alignment: .leading)
-                                Text("之后，你可以切换回，你喜欢的选项")
+                                Text("之后您可以切换回您喜欢的选项")
                                     .foregroundColor(.white)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
@@ -1516,7 +1551,7 @@ struct ContentView: View {
                                 tweaksAppliedSuccessfully = false
                             }
                         }) {
-                            Text("知道了！")
+                            Text("明白了！")
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(.white)
                                 .padding(.vertical, 10)
@@ -1543,15 +1578,15 @@ struct ContentView: View {
     private func resetProgress() {
         withAnimation {
             progressStep = 0
-            progressText = "> 系统兼容"
+            progressText = "> 准备就绪"
             hasError = false
             tweaksAppliedSuccessfully = false
         }
-        print("[!] 用户取消操作。")
+        print("[!] 调整被取消。")
     }
     
     private func runExploitForPath(path: String) throws -> String? {
-        iDeviceLogger("[*] 为路径执行漏洞利用: \(path)")
+        iDeviceLogger("[*] 对路径运行漏洞利用: \(path)")
         
         guard let cPath = strdup(path) else {
             let errorMessage = "为路径分配内存失败"
@@ -1573,11 +1608,11 @@ struct ContentView: View {
             case 13: // EACCES
                 errorMessage = "权限被拒绝 - 无法访问文件"
             case 1: // EPERM
-                errorMessage = "操作不允许 - 权限不足"
+                errorMessage = "操作不被允许 - 权限不足"
             case 21: // EISDIR
-                errorMessage = "期望文件但找到了目录"
+                errorMessage = "预期文件但找到目录"
             case 20: // ENOTDIR
-                errorMessage = "期望目录但找到了文件"
+                errorMessage = "预期目录但找到文件"
             case 28: // ENOSPC
                 errorMessage = "设备上没有剩余空间"
             case 9: // EBADF
