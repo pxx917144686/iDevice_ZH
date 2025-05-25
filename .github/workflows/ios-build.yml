@@ -7,7 +7,6 @@ on:
     branches: [ main ]
   workflow_dispatch: # 允许手动触发
 
-# 添加权限以允许创建Release
 permissions:
   contents: write
 
@@ -25,12 +24,6 @@ jobs:
       with:
         xcode-version: latest-stable
     
-    - name: 设置Ruby和CocoaPods
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.0'
-        bundler-cache: true
-    
     - name: 安装依赖
       run: |
         gem install cocoapods
@@ -39,45 +32,27 @@ jobs:
         else
           echo "没有找到Podfile，跳过CocoaPods依赖安装"
         fi
-      working-directory: ${{ github.workspace }}
       
-    - name: 修复Info.plist重复问题
+    - name: 修复桥接头文件和项目配置
       run: |
         # 创建桥接头文件
         echo "int poc(char *path);" > iDevice_ZH/iDevice_ZH-Bridge-Header.h
         
-        # 修复桥接头文件路径
-        sed -i '' 's|/Users/geosn0w/Desktop/iDevice_ZH/iDevice_ZH/iDevice_ZH-Bridge-Header.h|iDevice_ZH/iDevice_ZH-Bridge-Header.h|g' iDevice_ZH.xcodeproj/project.pbxproj
+        # 使用绝对路径修复桥接头文件引用
+        CURRENT_DIR="$(pwd)"
+        sed -i '' "s|/Users/geosn0w/Desktop/iDevice_ZH/iDevice_ZH/iDevice_ZH-Bridge-Header.h|$CURRENT_DIR/iDevice_ZH/iDevice_ZH-Bridge-Header.h|g" iDevice_ZH.xcodeproj/project.pbxproj
         
-        # 查找并移除项目中可能导致Info.plist重复的问题
+        # 同时修复pxx917144686的引用，如果存在
+        sed -i '' "s|/Users/pxx917144686/Desktop/iDevice_ZH/iDevice_ZH/iDevice_ZH-Bridge-Header.h|$CURRENT_DIR/iDevice_ZH/iDevice_ZH-Bridge-Header.h|g" iDevice_ZH.xcodeproj/project.pbxproj
+        
+        # 确保部署目标正确设置为16.0
+        sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = 12.0/IPHONEOS_DEPLOYMENT_TARGET = 16.0/g' iDevice_ZH.xcodeproj/project.pbxproj
+        
+        # 移除Info.plist重复引用
         if grep -q "Info.plist in Resources" iDevice_ZH.xcodeproj/project.pbxproj; then
           echo "在Copy Bundle Resources阶段找到Info.plist引用，准备移除..."
           sed -i '' '/Info.plist in Resources/d' iDevice_ZH.xcodeproj/project.pbxproj
         fi
-        
-        # 确保项目正确使用Info.plist
-        if [ -f "iDevice_ZH/Info.plist" ]; then
-          echo "已找到Info.plist文件"
-        else
-          echo "警告: 未找到Info.plist文件，请检查项目结构"
-        fi
-    
-    - name: 创建导出选项Plist
-      run: |
-        cat > exportOptions.plist << EOL
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>method</key>
-            <string>development</string>
-            <key>compileBitcode</key>
-            <false/>
-            <key>signingStyle</key>
-            <string>manual</string>
-        </dict>
-        </plist>
-        EOL
     
     - name: 构建和归档应用
       run: |
@@ -100,7 +75,7 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
           SWIFT_OPTIMIZATION_LEVEL="-Onone" \
-          IPHONEOS_DEPLOYMENT_TARGET=12.0
+          IPHONEOS_DEPLOYMENT_TARGET=16.0
       
     - name: 打包IPA
       run: |
@@ -127,8 +102,6 @@ jobs:
         # 打包IPA
         cd $RUNNER_TEMP/build
         zip -r iDevice_ZH.ipa Payload
-        
-        # 显示ZIP内容验证
         echo "IPA文件内容:"
         unzip -l iDevice_ZH.ipa | head -n 20
     
@@ -137,14 +110,13 @@ jobs:
       with:
         name: iDevice_ZH-unsigned
         path: ${{ runner.temp }}/build/iDevice_ZH.ipa
-    
+        
     - name: 获取当前日期
       id: date
       run: echo "date=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
     
     - name: 创建Release
       if: github.event_name != 'pull_request'
-      id: create_release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: build-${{ steps.date.outputs.date }}
@@ -168,18 +140,10 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
       
-      - name: 环境信息
-        run: |
-          swift --version
-          echo "代码库结构:"
-          find . -name "*.swift" | wc -l
-          echo "找到的Swift文件数量."
-      
       - name: Swift语法检查
         run: |
-          # 简单语法检查
+          swift --version
+          echo "执行基本语法检查..."
           find iDevice_ZH -name "*.swift" -print0 | xargs -0 -n1 swift -syntax-only || true
-          
-          # 返回成功状态
           echo "基本语法检查完成。"
           exit 0
