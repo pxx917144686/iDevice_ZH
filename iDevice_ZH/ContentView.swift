@@ -642,7 +642,7 @@ struct ContentView: View {
     }
     
     private var tweaksByCategory: [TweakCategory: [TweakPathForFile]] {
-        var categories = Dictionary(grouping: loadedTweaks) { $0.category }
+        var categories = Dictionary(grouping: tweaks) { $0.category }
         categories[.custom] = customTweakManager.customTweaks
         return categories
     }
