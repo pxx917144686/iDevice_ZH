@@ -37,16 +37,19 @@ jobs:
         fi
       working-directory: ${{ github.workspace }}
       
-    - name: 修复桥接头文件路径并准备Info.plist
+    - name: 从项目中移除Info.plist重复引用
       run: |
-        # 复制Info.plist到正确位置
-        cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
-        
         # 创建桥接头文件
         echo "int poc(char *path);" > iDevice_ZH/iDevice_ZH-Bridge-Header.h
         
         # 修复桥接头文件路径
         sed -i '' 's|/Users/geosn0w/Desktop/iDevice_ZH/iDevice_ZH/iDevice_ZH-Bridge-Header.h|iDevice_ZH/iDevice_ZH-Bridge-Header.h|g' iDevice_ZH.xcodeproj/project.pbxproj
+        
+        # 准备Info.plist文件
+        cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
+        
+        # 从Copy Bundle Resources构建阶段移除Info.plist以避免重复
+        sed -i '' '/iDevice_ZH\/Info.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
 
     - name: 构建应用
       run: |
@@ -59,8 +62,8 @@ jobs:
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 使用模拟器构建 - 移除了INFOPLIST_FILE参数
-        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+        # 使用模拟器构建
+        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO INFOPLIST_FILE="iDevice_ZH/Info.plist"
       working-directory: ${{ github.workspace }}
       
     - name: 上传构建产物
@@ -95,16 +98,19 @@ jobs:
         fi
       working-directory: ${{ github.workspace }}
     
-    - name: 准备Info.plist和桥接头文件
+    - name: 从项目中移除Info.plist重复引用
       run: |
-        # 复制Info.plist到正确位置
-        cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
-        
         # 创建桥接头文件
         echo "int poc(char *path);" > iDevice_ZH/iDevice_ZH-Bridge-Header.h
         
         # 修复桥接头文件路径
         sed -i '' 's|/Users/geosn0w/Desktop/iDevice_ZH/iDevice_ZH/iDevice_ZH-Bridge-Header.h|iDevice_ZH/iDevice_ZH-Bridge-Header.h|g' iDevice_ZH.xcodeproj/project.pbxproj
+        
+        # 准备Info.plist文件
+        cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
+        
+        # 从Copy Bundle Resources构建阶段移除Info.plist以避免重复
+        sed -i '' '/iDevice_ZH\/Info.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
       
     - name: 确保正确使用ExportOptions.plist
       run: |
@@ -158,8 +164,8 @@ jobs:
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 针对模拟器构建并归档 - 移除了INFOPLIST_FILE参数
-        xcodebuild $WORKSPACE_ARG -scheme "iDevice_ZH" -configuration Debug -sdk iphonesimulator -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO EXCLUDED_ARCHS=arm64
+        # 针对模拟器构建并归档
+        xcodebuild $WORKSPACE_ARG -scheme "iDevice_ZH" -configuration Debug -sdk iphonesimulator -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO EXCLUDED_ARCHS=arm64 INFOPLIST_FILE="iDevice_ZH/Info.plist"
         
         # 检查归档是否成功
         ls -la $RUNNER_TEMP/iDevice_ZH.xcarchive/Products/ || true
