@@ -7,7 +7,7 @@
       "/System/Library/PrivateFrameworks/CoreMaterial.framework/dockLight.materialrecipe"
     ],
     "description": "完全移除主屏幕底部Dock栏的背景。由@Skadz108开发。",
-    "category": "Aesthetics"
+    "category": "外观"
   },
   {
     "icon": "line.3.horizontal",
@@ -16,7 +16,7 @@
       "/System/Library/PrivateFrameworks/MaterialKit.framework/Assets.car"
     ],
     "description": "移除屏幕底部的主页指示条。由@Skadz108开发。",
-    "category": "Aesthetics"
+    "category": "外观"
   },
   {
     "icon": "folder",
@@ -26,7 +26,7 @@
       "/System/Library/PrivateFrameworks/SpringBoardHome.framework/folderLight.materialrecipe"
     ],
     "description": "使应用文件夹完全透明。由@Skadz108开发。",
-    "category": "Aesthetics"
+    "category": "外观"
   },
   {
     "icon": "lock.iphone",
@@ -35,7 +35,7 @@
       "/System/Library/PrivateFrameworks/CoverSheet.framework/dashBoardPasscodeBackground.materialrecipe"
     ],
     "description": "移除锁屏界面密码输入框的背景",
-    "category": "Aesthetics"
+    "category": "外观"
   },
   {
     "icon": "bubble.left",
@@ -45,7 +45,7 @@
       "/System/Library/PrivateFrameworks/ChatKit.framework/bubbleLight.materialrecipe"
     ],
     "description": "简化消息应用中聊天气泡的外观",
-    "category": "Experimental"
+    "category": "测试"
   },
   {
     "icon": "square.stack.3d.forward.dottedline",
@@ -59,7 +59,7 @@
       "/System/Library/PrivateFrameworks/CoreMaterial.framework/platters.materialrecipe"
     ],
     "description": "透明化媒体播放器和通知。由@straight_tamago / mdc0开发",
-    "category": "Aesthetics"
+    "category": "外观"
   },
   {
     "icon": "textformat",
@@ -75,7 +75,7 @@
       "/System/Library/Fonts/CoreUI/SFUISoft.ttf"
     ],
     "description": "将界面字体完全切换为Helvetica。由GeoSn0w开发。灵感来自jailbreak.party Discord。",
-    "category": "Aesthetics"
+    "category": "外观"
   },
   {
     "icon": "face.dashed.fill",
@@ -84,7 +84,7 @@
       "/System/Library/Fonts/CoreAddition/AppleColorEmoji-160px.ttc"
     ],
     "description": "完全禁用所有表情符号。由GeoSn0w开发。",
-    "category": "Aesthetics"
+    "category": "外观"
   },
   {
     "icon": "eye.slash.fill",
@@ -98,7 +98,7 @@
               "/System/Library/Audio/UISounds/Modern/camera_shutter_burst_end.caf"
       ],
     "description": "禁用相机快门声音。关闭相机应用可能会重新启用它。由@straight_tamago开发",
-    "category": "Privacy"
+    "category": "隐私"
   },
   {
     "icon": "power.circle.fill",
@@ -107,6 +107,6 @@
        "/usr/lib/dyld"
       ],
     "description": "通过触发系统崩溃强制重启iOS，仅供娱乐。由@skadz108开发",
-    "category": "Experimental"
+    "category": "测试"
   }
 ]
