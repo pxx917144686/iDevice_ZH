@@ -5,7 +5,6 @@
 //  Created by GeoSn0w on 5/14/25.
 //  Copyright © 2025 GeoSn0w. All rights reserved.
 //
-
 import SwiftUI
 import DeviceKit
 import Combine
@@ -90,41 +89,41 @@ var body: some View {
         .preferredColorScheme(.dark)
         .alert(isPresented: $showSuccessAlert) {
             Alert(
-                title: Text("成功"),
+                title: Text("Success"),
                 message: Text(successMessage),
-                dismissButton: .default(Text("确定")) {
+                dismissButton: .default(Text("OK")) {
                     presentationMode.wrappedValue.dismiss()
                 }
             )
         }
-        .alert("错误", isPresented: $showErrorAlert) {
-            Button("确定", role: .cancel) { }
+        .alert("Error", isPresented: $showErrorAlert) {
+            Button("OK", role: .cancel) { }
         } message: {
             Text(errorMessage)
         }
-        .alert("导出错误", isPresented: $showExportErrorAlert) {
-            Button("确定", role: .cancel) { }
+        .alert("Export Error", isPresented: $showExportErrorAlert) {
+            Button("OK", role: .cancel) { }
         } message: {
             Text(exportErrorMessage)
         }
-        .alert("输入文件夹路径", isPresented: $showFolderPathInputAlert) {
-            TextField("路径", text: $folderPathInput)
+        .alert("Enter Folder Path", isPresented: $showFolderPathInputAlert) {
+            TextField("Path", text: $folderPathInput)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
                 .foregroundColor(.black)
             
-            Button("取消", role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 folderPathInput = ""
             }
             
-            Button("扫描") {
+            Button("Scan") {
                 if !folderPathInput.isEmpty {
                     scanFilesInDirectory(folderPathInput)
                 }
                 folderPathInput = ""
             }
         } message: {
-            Text("输入要扫描文件的文件夹路径")
+            Text("Enter the folder path to scan for files")
         }
         .sheet(isPresented: $showIconPicker) {
             iconPickerView
@@ -153,7 +152,7 @@ var body: some View {
                     }
                 },
                 onError: { error in
-                    errorMessage = "导入错误: \(error.localizedDescription)"
+                    errorMessage = "Import error: \(error.localizedDescription)"
                     showErrorAlert = true
                 }
             )
@@ -169,13 +168,13 @@ var body: some View {
         ) { result in
             switch result {
             case .success(let url):
-                successMessage = "成功导出补丁到 \(url.lastPathComponent)"
+                successMessage = "Successfully exported tweak to \(url.lastPathComponent)"
                 showSuccessAlert = true
-                iDeviceLogger("[+] 成功导出补丁到: \(url.lastPathComponent)")
+                iDeviceLogger("[+] Successfully exported tweak to: \(url.lastPathComponent)")
             case .failure(let error):
-                exportErrorMessage = "导出失败: \(error.localizedDescription)"
+                exportErrorMessage = "Failed to export: \(error.localizedDescription)"
                 showExportErrorAlert = true
-                iDeviceLogger("[!] 导出过程中出错: \(error.localizedDescription)")
+                iDeviceLogger("[!] Error during export: \(error.localizedDescription)")
             }
         }
     }
@@ -199,7 +198,7 @@ private var headerView: some View {
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(ToolkitColors.accent)
             
-            Text("创建自定义补丁")
+            Text("Create Custom Tweak")
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
         }
@@ -224,13 +223,13 @@ private var formSection: some View {
     VStack(spacing: 20) {
         // Name field
         VStack(alignment: .leading, spacing: 8) {
-            Text("补丁名称")
+            Text("Tweak Name")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
             
             TextField("", text: $tweakName)
                 .placeholder(when: tweakName.isEmpty) {
-                    Text("输入补丁名称").foregroundColor(.gray.opacity(0.7))
+                    Text("Enter tweak name").foregroundColor(.gray.opacity(0.7))
                 }
                 .padding(12)
                 .background(
@@ -246,7 +245,7 @@ private var formSection: some View {
         
         // Icon selector
         VStack(alignment: .leading, spacing: 8) {
-            Text("图标")
+            Text("Icon")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
             
@@ -267,7 +266,7 @@ private var formSection: some View {
                                 )
                         )
                     
-                    Text("选择图标")
+                    Text("Select Icon")
                         .font(.system(size: 16))
                         .foregroundColor(.white)
                     
@@ -286,13 +285,13 @@ private var formSection: some View {
         
         // Description field
         VStack(alignment: .leading, spacing: 8) {
-            Text("描述")
+            Text("Description")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
             
             ZStack(alignment: .topLeading) {
                 if tweakDescription.isEmpty {
-                    Text("输入补丁描述。这个补丁的功能是什么？")
+                    Text("Enter tweak description. What does this do?")
                         .foregroundColor(.gray.opacity(0.7))
                         .padding(.top, 12)
                         .padding(.leading, 12)
@@ -318,7 +317,7 @@ private var formSection: some View {
         // Paths field
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("目标路径（用逗号分隔）")
+                Text("Target Paths (comma separated)")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
                 
@@ -330,7 +329,7 @@ private var formSection: some View {
                     HStack(spacing: 4) {
                         Image(systemName: "folder.badge.plus")
                             .font(.system(size: 14))
-                        Text("浏览")
+                        Text("Browse")
                             .font(.system(size: 14))
                     }
                     .padding(.horizontal, 10)
@@ -349,7 +348,7 @@ private var formSection: some View {
             
             ZStack(alignment: .topLeading) {
                 if tweakPaths.isEmpty {
-                    Text("/路径/到/文件1,/路径/到/文件2")
+                    Text("/path/to/file1,/path/to/file2")
                         .foregroundColor(.gray.opacity(0.7))
                         .padding(.top, 12)
                         .padding(.leading, 12)
@@ -371,7 +370,7 @@ private var formSection: some View {
                     )
             )
             
-            Text("示例: /var/mobile/Library/Preferences/com.apple.springboard.plist")
+            Text("Example: /var/mobile/Library/Preferences/com.apple.springboard.plist")
                 .font(.system(size: 12))
                 .foregroundColor(.gray)
                 .padding(.horizontal, 4)
@@ -388,7 +387,7 @@ private var actionButtons: some View {
     VStack(spacing: 16) {
         ToolkitButton(
             icon: "checkmark.circle.fill",
-            text: "保存自定义补丁",
+            text: "Save Custom Tweak",
             disabled: tweakName.isEmpty || tweakPaths.isEmpty
         ) {
             saveCustomTweak()
@@ -396,7 +395,7 @@ private var actionButtons: some View {
         
         ToolkitButton(
             icon: "arrow.down.doc.fill",
-            text: "从文件导入",
+            text: "Import From File",
             disabled: false
         ) {
             showDocumentPicker = true
@@ -405,7 +404,7 @@ private var actionButtons: some View {
         if !customTweakManager.customTweaks.isEmpty {
             ToolkitButton(
                 icon: "square.and.arrow.up",
-                text: "导出补丁",
+                text: "Export Tweak",
                 disabled: false
             ) {
                 showExportPicker = true
@@ -421,7 +420,7 @@ private var iconPickerView: some View {
         
         VStack(spacing: 0) {
             HStack {
-                Text("选择图标")
+                Text("Select Icon")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
                 
@@ -430,7 +429,7 @@ private var iconPickerView: some View {
                 Button(action: {
                     showIconPicker = false
                 }) {
-                    Text("完成")
+                    Text("Done")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(ToolkitColors.accent)
                 }
@@ -486,20 +485,20 @@ private var exportTweakPicker: some View {
                     Button(action: {
                         showExportPicker = false
                     }) {
-                        Text("取消")
+                        Text("Cancel")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(ToolkitColors.accent)
                     }
                     
                     Spacer()
                     
-                    Text("选择要导出的补丁")
+                    Text("Select Tweak to Export")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
                     
                     Spacer()
                     
-                    Text("取消")
+                    Text("Cancel")
                         .foregroundColor(.clear)
                 }
                 .padding(.horizontal, 16)
@@ -574,14 +573,14 @@ struct FolderPathSelectorView: View {
                         Button(action: {
                             presentationMode.wrappedValue.dismiss()
                         }) {
-                            Text("取消")
+                            Text("Cancel")
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(ToolkitColors.accent)
                         }
                         
                         Spacer()
                         
-                        Text("选择文件")
+                        Text("Select Files")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
                         
@@ -590,7 +589,7 @@ struct FolderPathSelectorView: View {
                         Button(action: {
                             presentationMode.wrappedValue.dismiss()
                         }) {
-                            Text("完成")
+                            Text("Done")
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(ToolkitColors.accent)
                         }
@@ -608,7 +607,7 @@ struct FolderPathSelectorView: View {
                                 HStack(spacing: 4) {
                                     Image(systemName: "chevron.left")
                                         .font(.system(size: 14))
-                                    Text("返回")
+                                    Text("Back")
                                         .font(.system(size: 14))
                                 }
                                 .foregroundColor(ToolkitColors.accent)
@@ -642,7 +641,7 @@ struct FolderPathSelectorView: View {
                         Button(action: {
                             selectAllFiles()
                         }) {
-                            Text("全选")
+                            Text("Select All")
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(ToolkitColors.accent)
                         }
@@ -658,7 +657,7 @@ struct FolderPathSelectorView: View {
                         Button(action: {
                             selectedFiles.removeAll()
                         }) {
-                            Text("取消全选")
+                            Text("Deselect All")
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(ToolkitColors.accent)
                         }
@@ -677,13 +676,13 @@ struct FolderPathSelectorView: View {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: ToolkitColors.accent))
                             .scaleEffect(1.5)
-                        Text("正在扫描文件...")
+                        Text("Scanning files...")
                             .foregroundColor(.gray)
                             .padding(.top, 16)
                         Spacer()
                     } else if filesList.isEmpty {
                         Spacer()
-                        Text("此目录中没有找到文件")
+                        Text("No files found in this directory")
                             .foregroundColor(.gray)
                             .padding()
                         Spacer()
@@ -699,7 +698,7 @@ struct FolderPathSelectorView: View {
                     }
                     
                     HStack {
-                        Text("已选择 \(selectedFiles.count) 个文件")
+                        Text("\(selectedFiles.count) files selected")
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
                         
@@ -710,7 +709,7 @@ struct FolderPathSelectorView: View {
                         }) {
                             HStack {
                                 Image(systemName: "plus.circle.fill")
-                                Text("添加所选")
+                                Text("Add Selected")
                             }
                             .foregroundColor(.white)
                             .padding(.horizontal, 16)
@@ -749,7 +748,7 @@ struct FolderPathSelectorView: View {
     
     private var currentPathComponents: [String] {
         let components = currentPath.split(separator: "/").map(String.init)
-        return ["根目录"] + components
+        return ["Root"] + components
     }
     
     private func fileCellView(_ file: FileItem) -> some View {
@@ -861,7 +860,7 @@ struct FolderPathSelectorView: View {
                 }
             }
         } catch {
-            iDeviceLogger("[!] 列出目录内容失败，路径 \(path): \(error.localizedDescription)")
+            iDeviceLogger("[!] Failed to list directory contents at \(path): \(error.localizedDescription)")
             return []
         }
     }
@@ -890,7 +889,7 @@ struct FolderPathSelectorView: View {
 }
 private func saveCustomTweak() {
     guard !tweakName.isEmpty, !tweakPaths.isEmpty else {
-        errorMessage = "名称和路径为必填项"
+        errorMessage = "Name and paths are required"
         showErrorAlert = true
         return
     }
@@ -901,7 +900,7 @@ private func saveCustomTweak() {
         .filter { !$0.isEmpty }
     
     guard !paths.isEmpty else {
-        errorMessage = "没有提供有效路径"
+        errorMessage = "No valid paths provided"
         showErrorAlert = true
         return
     }
@@ -917,10 +916,10 @@ private func saveCustomTweak() {
     let success = customTweakManager.addCustomTweak(newTweak)
     
     if success {
-        successMessage = "自定义补丁 '\(tweakName)' 创建成功！"
+        successMessage = "Custom tweak '\(tweakName)' created successfully!"
         showSuccessAlert = true
     } else {
-        errorMessage = "保存补丁失败。可能已存在同名补丁。"
+        errorMessage = "Failed to save tweak. A tweak with this name may already exist."
         showErrorAlert = true
     }
 }
@@ -928,11 +927,11 @@ private func saveCustomTweak() {
 private func importTweak(from url: URL) -> Bool {
     let success = customTweakManager.importTweak(from: url)
     if success {
-        successMessage = "补丁导入成功！"
+        successMessage = "Tweak imported successfully!"
         showSuccessAlert = true
         return true
     } else {
-        errorMessage = "导入补丁失败。文件可能已损坏或无法访问。"
+        errorMessage = "Failed to import tweak. The file may be corrupt or inaccessible."
         showErrorAlert = true
         return false
     }
@@ -943,7 +942,7 @@ private func exportTweak(_ tweak: TweakPathForFile) {
     if let _ = exportURL {
         showDocumentExporter = true
     } else {
-        exportErrorMessage = "准备导出补丁失败。"
+        exportErrorMessage = "Failed to prepare tweak for export."
         showExportErrorAlert = true
     }
 }
@@ -999,7 +998,7 @@ private func listDirectoryContents(at path: String) -> [FileItem] {
             }
         }
     } catch {
-        iDeviceLogger("[!] 列出目录内容失败，路径 \(path): \(error.localizedDescription)")
+        iDeviceLogger("[!] Failed to list directory contents at \(path): \(error.localizedDescription)")
         return []
     }
 }
@@ -1037,4 +1036,5 @@ struct JSONFile: FileDocument {
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         return FileWrapper(regularFileWithContents: data)
     }
+}
 }
