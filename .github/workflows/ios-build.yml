@@ -45,7 +45,11 @@ jobs:
           WORKSPACE_ARG="-project iDevice_ZH.xcodeproj"
         fi
         
-        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 14 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+        # 列出可用的scheme
+        xcodebuild -list $WORKSPACE_ARG
+        
+        # 使用一个在CI环境中可用的模拟器，例如iPhone 16 Pro
+        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
       working-directory: ${{ github.workspace }}
       
     - name: 上传构建产物
@@ -99,7 +103,14 @@ jobs:
       env:
         PROFILE_UUID: ${{ secrets.PROFILE_UUID }}
       run: |
-        xcodebuild -workspace "iDevice_ZH.xcworkspace" -scheme "iDevice_ZH" -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive -allowProvisioningUpdates
+        # 列出可用的scheme
+        xcodebuild -list -workspace "iDevice_ZH.xcworkspace"
+        
+        # 使用第一个可用的scheme
+        SCHEME=$(xcodebuild -list -workspace "iDevice_ZH.xcworkspace" | grep -A 10 "Schemes:" | tail -n +2 | grep -v "^$" | head -1 | xargs)
+        echo "使用scheme: $SCHEME"
+        
+        xcodebuild -workspace "iDevice_ZH.xcworkspace" -scheme "$SCHEME" -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive -allowProvisioningUpdates
         xcodebuild -exportArchive -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $RUNNER_TEMP/build
       
     - name: 上传IPA
