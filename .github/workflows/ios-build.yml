@@ -30,12 +30,22 @@ jobs:
     - name: 安装依赖
       run: |
         gem install cocoapods
-        pod install --repo-update
+        if [ -f "Podfile" ]; then
+          pod install --repo-update
+        else
+          echo "没有找到Podfile，跳过CocoaPods依赖安装"
+        fi
       working-directory: ${{ github.workspace }}
       
     - name: 构建应用
       run: |
-        xcodebuild clean build -workspace "iDevice_ZH.xcworkspace" -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 14 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+        if [ -f "iDevice_ZH.xcworkspace/contents.xcworkspacedata" ]; then
+          WORKSPACE_ARG="-workspace iDevice_ZH.xcworkspace"
+        else
+          WORKSPACE_ARG="-project iDevice_ZH.xcodeproj"
+        fi
+        
+        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 14 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
       working-directory: ${{ github.workspace }}
       
     - name: 上传构建产物
