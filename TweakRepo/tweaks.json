@@ -1,0 +1,121 @@
+[
+  {
+    "icon": "dock.rectangle",
+    "name": "隐藏Dock栏",
+    "paths": [
+      "/System/Library/PrivateFrameworks/CoreMaterial.framework/dockDark.materialrecipe",
+      "/System/Library/PrivateFrameworks/CoreMaterial.framework/dockLight.materialrecipe"
+    ],
+    "description": "完全移除主屏幕Dock栏背景。调整由@Skadz108提供。",
+    "category": "美观"
+  },
+  {
+    "icon": "line.3.horizontal",
+    "name": "隐藏底部指示条",
+    "paths": [
+      "/System/Library/PrivateFrameworks/MaterialKit.framework/Assets.car"
+    ],
+    "description": "移除底部主页指示条。调整由@Skadz108提供。",
+    "category": "美观"
+  },
+  {
+    "icon": "folder",
+    "name": "隐藏文件夹背景",
+    "paths": [
+      "/System/Library/PrivateFrameworks/SpringBoardHome.framework/folderDark.materialrecipe",
+      "/System/Library/PrivateFrameworks/SpringBoardHome.framework/folderLight.materialrecipe"
+    ],
+    "description": "使应用文件夹完全透明。调整由@Skadz108提供。",
+    "category": "美观"
+  },
+  {
+    "icon": "lock.iphone",
+    "name": "隐藏解锁背景",
+    "paths": [
+      "/System/Library/PrivateFrameworks/CoverSheet.framework/dashBoardPasscodeBackground.materialrecipe"
+    ],
+    "description": "移除锁屏界面密码输入背景",
+    "category": "美观"
+  },
+  {
+    "icon": "bubble.left",
+    "name": "简洁消息气泡",
+    "paths": [
+      "/System/Library/PrivateFrameworks/ChatKit.framework/bubbleDark.materialrecipe",
+      "/System/Library/PrivateFrameworks/ChatKit.framework/bubbleLight.materialrecipe"
+    ],
+    "description": "简化信息应用中聊天气泡的外观",
+    "category": "实验性"
+  },
+  {
+    "icon": "square.stack.3d.forward.dottedline",
+    "name": "透明播放器和通知",
+    "paths": [
+      "/System/Library/PrivateFrameworks/CoreMaterial.framework/platterStrokeLight.visualstyleset",
+      "/System/Library/PrivateFrameworks/CoreMaterial.framework/platterStrokeDark.visualstyleset",
+      "/System/Library/PrivateFrameworks/CoreMaterial.framework/plattersDark.materialrecipe",
+      "/System/Library/PrivateFrameworks/SpringBoardHome.framework/folderLight.materialrecipe",
+      "/System/Library/PrivateFrameworks/SpringBoardHome.framework/folderDark.materialrecipe",
+      "/System/Library/PrivateFrameworks/CoreMaterial.framework/platters.materialrecipe"
+    ],
+    "description": "透明媒体播放器和通知。调整由@straight_tamago / mdc0提供",
+    "category": "美观"
+  },
+  {
+    "icon": "textformat",
+    "name": "切换至Helvetica字体",
+    "paths": [
+      "/System/Library/Fonts/Core/SFUIItalic.ttf",
+      "/System/Library/Fonts/Core/SFUI.ttf",
+      "/System/Library/Fonts/Core/SFUIMono.ttf",
+      "/System/Library/Fonts/Core/SFUIMonoItalic.ttf",
+      "/System/Library/Fonts/CoreUI/SFUI.ttf",
+      "/System/Library/Fonts/CoreUI/SFUIItalic.ttf",
+      "/System/Library/Fonts/CoreUI/SFUIRounded.ttf",
+      "/System/Library/Fonts/CoreUI/SFUISoft.ttf"
+    ],
+    "description": "将界面完全切换至Helvetica字体。调整由GeoSn0w提供。这个想法来源于jailbreak.party Discord频道。",
+    "category": "美观"
+  },
+  {
+    "icon": "face.dashed.fill",
+    "name": "完全禁用表情符号",
+    "paths": [
+      "/System/Library/Fonts/CoreAddition/AppleColorEmoji-160px.ttc"
+    ],
+    "description": "完全禁用所有表情符号。调整由GeoSn0w提供。",
+    "category": "美观"
+  },
+  {
+    "icon": "eye.slash.fill",
+    "name": "禁用控制中心模糊效果",
+    "paths": [
+      "/System/Library/PrivateFrameworks/CoreMaterial.framework/modulesBackground.materialrecipe"
+    ],
+    "description": "完全禁用控制中心的模糊效果。",
+    "category": "美观"
+  },
+  {
+    "icon": "eye.slash.fill",
+    "name": "移除相机快门声",
+    "paths": [
+       "/System/Library/Audio/UISounds/photoShutter.caf",
+              "/System/Library/Audio/UISounds/begin_record.caf",
+              "/System/Library/Audio/UISounds/end_record.caf",
+              "/System/Library/Audio/UISounds/Modern/camera_shutter_burst.caf",
+              "/System/Library/Audio/UISounds/Modern/camera_shutter_burst_begin.caf",
+              "/System/Library/Audio/UISounds/Modern/camera_shutter_burst_end.caf"
+      ],
+    "description": "禁用相机快门声。关闭相机应用后可能会重新启用。调整由@straight_tamago提供",
+    "category": "隐私"
+  },
+  {
+    "icon": "power.circle.fill",
+    "name": "强制重启iOS",
+    "paths": [
+       "/usr/lib/dyld"
+      ],
+    "description": "通过引发系统错误强制重启iOS，仅供娱乐。调整由@skadz108提供",
+    "category": "实验性"
+  }
+]
