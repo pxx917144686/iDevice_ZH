@@ -78,14 +78,26 @@ jobs:
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: latest-stable
+    
+    - name: 修复桥接头文件路径
+      run: |
+        echo "int poc(char *path);" > iDevice_ZH/iDevice_ZH-Bridge-Header.h
+        sed -i '' 's|/Users/geosn0w/Desktop/iDevice_ZH/iDevice_ZH/iDevice_ZH-Bridge-Header.h|iDevice_ZH/iDevice_ZH-Bridge-Header.h|g' iDevice_ZH.xcodeproj/project.pbxproj
+      
+    - name: 强制使用Debug配置
+      run: |
+        # 修改构建配置，确保使用 Debug 配置进行归档（包含 -Onone 优化级别）
+        if [ -f "iDevice_ZH.xcodeproj/project.pbxproj" ]; then
+          # 确保Swift优化级别设置正确
+          sed -i '' 's/SWIFT_OPTIMIZATION_LEVEL = "-O"/SWIFT_OPTIMIZATION_LEVEL = "-Onone"/g' iDevice_ZH.xcodeproj/project.pbxproj
+          sed -i '' 's/SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule"/SWIFT_OPTIMIZATION_LEVEL = "-Onone"/g' iDevice_ZH.xcodeproj/project.pbxproj
+        fi
   
     - name: 构建和归档
       run: |
         # 检查工作区文件是否存在，并使用正确的路径
         if [ -f "iDevice_ZH.xcworkspace/contents.xcworkspacedata" ]; then
           WORKSPACE_ARG="-workspace iDevice_ZH.xcworkspace"
-        elif [ -f "iDevice_ZH.xcodeproj/project.xcworkspace/contents.xcworkspacedata" ]; then
-          WORKSPACE_ARG="-workspace iDevice_ZH.xcodeproj/project.xcworkspace"
         else
           WORKSPACE_ARG="-project iDevice_ZH.xcodeproj"
         fi
@@ -93,17 +105,13 @@ jobs:
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 使用第一个可用的scheme
-        SCHEME=$(xcodebuild -list $WORKSPACE_ARG | grep -A 10 "Schemes:" | tail -n +2 | grep -v "^$" | head -1 | xargs)
-        echo "使用scheme: $SCHEME"
-        
-        # 构建而不签名
-        xcodebuild $WORKSPACE_ARG -scheme "$SCHEME" -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+        # 使用指定的scheme和配置
+        xcodebuild $WORKSPACE_ARG -scheme "iDevice_ZH" -configuration Debug -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO SWIFT_OPTIMIZATION_LEVEL="-Onone"
         
         # 创建导出目录
         mkdir -p $RUNNER_TEMP/build
         
-        # 复制构建产物（因为没有签名，无法创建IPA，但可以保存构建产物）
+        # 复制构建产物
         cp -R $RUNNER_TEMP/iDevice_ZH.xcarchive $RUNNER_TEMP/build/
     
     - name: 上传构建产物
