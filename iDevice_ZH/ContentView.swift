@@ -608,8 +608,6 @@ private class CancellableStore {
 }
 
 struct ContentView: View {
-    @StateObject private var updateService = UpdateService.shared
-    @State private var updateCheckCancellable: AnyCancellable?
     let device = Device.current
     @AppStorage("enabledTweaks") private var enabledTweakIds: [String] = []
     @State private var progressStep: Int = 0
@@ -655,20 +653,11 @@ struct ContentView: View {
                 checkVersionCompatibility()
                 iDeviceLogger("[i] iDevice Central: 终端会话已启动")
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    updateService.checkForUpdates()
-                }
-                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     loadTweaks()
                     customTweakManager.loadCustomTweaks()
                 }
                 
-            }
-            .overlay {
-                if updateService.showUpdateAlert {
-                    UpdateAlertView()
-                }
             }
             .sheet(isPresented: $showTerminalLog) {
                 iDeviceCentralTerminal()
