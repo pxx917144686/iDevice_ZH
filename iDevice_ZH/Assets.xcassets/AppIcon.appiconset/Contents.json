@@ -1,0 +1,14 @@
+{
+  "images" : [
+    {
+      "filename" : "x..png",
+      "idiom" : "universal",
+      "scale" : "1x",
+      "size" : "400x400"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
