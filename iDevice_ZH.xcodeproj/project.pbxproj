@@ -92,6 +92,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
 				ORGANIZATIONNAME = GeoSn0w;
 				TargetAttributes = {
 					4397F9502DCDDA0100090799 = {
