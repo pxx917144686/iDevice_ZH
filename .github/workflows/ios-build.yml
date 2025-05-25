@@ -48,21 +48,37 @@ jobs:
         # 准备Info.plist文件
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
-        echo "原始project.pbxproj中的Info.plist引用:"
+        echo "========== 修复前的项目文件 =========="
         grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "没有找到Info.plist引用"
         
-        # 彻底删除所有Info.plist相关引用
-        # 删除文件引用
-        sed -i '' '/Info\.plist.*= {isa = PBXFileReference/d' iDevice_ZH.xcodeproj/project.pbxproj
-        # 删除构建文件引用
-        sed -i '' '/Info\.plist.*= {isa = PBXBuildFile/d' iDevice_ZH.xcodeproj/project.pbxproj
-        # 删除Copy Bundle Resources中的引用
-        sed -i '' '/.*Info\.plist.*fileRef/d' iDevice_ZH.xcodeproj/project.pbxproj
-        # 删除任何路径相关的Info.plist引用
-        sed -i '' '/iDevice_ZH\/Info\.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
-        sed -i '' '/Info\.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
+        # 完全移除所有Info.plist引用 - 使用更精确的匹配
+        python3 -c "
+import re
+import os
+
+# 读取项目文件
+with open('iDevice_ZH.xcodeproj/project.pbxproj', 'r') as f:
+    content = f.read()
+
+# 查找并移除所有Info.plist相关的行
+lines = content.split('\n')
+filtered_lines = []
+
+for line in lines:
+    # 跳过包含Info.plist的行
+    if 'Info.plist' in line:
+        print(f'移除行: {line.strip()}')
+        continue
+    filtered_lines.append(line)
+
+# 写回文件
+with open('iDevice_ZH.xcodeproj/project.pbxproj', 'w') as f:
+    f.write('\n'.join(filtered_lines))
+
+print('完成Info.plist引用清理')
+"
         
-        echo "清理后的project.pbxproj中的Info.plist引用:"
+        echo "========== 修复后的项目文件 =========="
         grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "所有Info.plist引用已清除"
 
     - name: 构建应用
@@ -76,8 +92,8 @@ jobs:
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 使用模拟器构建，明确指定Info.plist路径
-        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO INFOPLIST_FILE="iDevice_ZH/Info.plist"
+        # 使用模拟器构建 - 不再指定INFOPLIST_FILE，让Xcode使用项目设置
+        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
       working-directory: ${{ github.workspace }}
       
     - name: 上传构建产物
@@ -123,12 +139,28 @@ jobs:
         # 准备Info.plist文件
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
-        # 彻底删除所有Info.plist相关引用
-        sed -i '' '/Info\.plist.*= {isa = PBXFileReference/d' iDevice_ZH.xcodeproj/project.pbxproj
-        sed -i '' '/Info\.plist.*= {isa = PBXBuildFile/d' iDevice_ZH.xcodeproj/project.pbxproj
-        sed -i '' '/.*Info\.plist.*fileRef/d' iDevice_ZH.xcodeproj/project.pbxproj
-        sed -i '' '/iDevice_ZH\/Info\.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
-        sed -i '' '/Info\.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
+        # 完全移除所有Info.plist引用 - 使用Python脚本确保彻底清理
+        python3 -c "
+import re
+
+# 读取项目文件
+with open('iDevice_ZH.xcodeproj/project.pbxproj', 'r') as f:
+    content = f.read()
+
+# 查找并移除所有Info.plist相关的行
+lines = content.split('\n')
+filtered_lines = []
+
+for line in lines:
+    # 跳过包含Info.plist的行
+    if 'Info.plist' in line:
+        continue
+    filtered_lines.append(line)
+
+# 写回文件
+with open('iDevice_ZH.xcodeproj/project.pbxproj', 'w') as f:
+    f.write('\n'.join(filtered_lines))
+"
       
     - name: 确保正确使用ExportOptions.plist
       run: |
@@ -182,8 +214,8 @@ jobs:
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 针对模拟器构建并归档，明确指定Info.plist
-        xcodebuild $WORKSPACE_ARG -scheme "iDevice_ZH" -configuration Debug -sdk iphonesimulator -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO EXCLUDED_ARCHS=arm64 INFOPLIST_FILE="iDevice_ZH/Info.plist"
+        # 针对模拟器构建并归档 - 不再指定INFOPLIST_FILE
+        xcodebuild $WORKSPACE_ARG -scheme "iDevice_ZH" -configuration Debug -sdk iphonesimulator -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO EXCLUDED_ARCHS=arm64
         
         # 检查归档是否成功
         ls -la $RUNNER_TEMP/iDevice_ZH.xcarchive/Products/ || true
@@ -213,13 +245,12 @@ jobs:
         if [ -d "$APP_PATH" ]; then
           echo "找到应用程序: $APP_PATH，开始打包IPA..."
           
-          # 验证应用包内的Info.plist
-          if [ -f "$APP_PATH/Info.plist" ]; then
-            echo "应用包中已有Info.plist文件"
-            plutil -p "$APP_PATH/Info.plist" || echo "Info.plist可能存在问题"
-          else
-            echo "警告：应用包中没有找到Info.plist，尝试复制..."
+          # 确保应用包中有Info.plist
+          if [ ! -f "$APP_PATH/Info.plist" ]; then
+            echo "应用包中缺少Info.plist，复制源文件..."
             cp iDevice_ZH/Info.plist "$APP_PATH/Info.plist"
+          else
+            echo "应用包中已有Info.plist文件"
           fi
           
           # 复制应用到Payload目录
