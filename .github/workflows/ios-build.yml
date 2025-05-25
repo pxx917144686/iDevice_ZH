@@ -81,15 +81,24 @@ jobs:
   
     - name: 构建和归档
       run: |
+        # 检查工作区文件是否存在，并使用正确的路径
+        if [ -f "iDevice_ZH.xcworkspace/contents.xcworkspacedata" ]; then
+          WORKSPACE_ARG="-workspace iDevice_ZH.xcworkspace"
+        elif [ -f "iDevice_ZH.xcodeproj/project.xcworkspace/contents.xcworkspacedata" ]; then
+          WORKSPACE_ARG="-workspace iDevice_ZH.xcodeproj/project.xcworkspace"
+        else
+          WORKSPACE_ARG="-project iDevice_ZH.xcodeproj"
+        fi
+        
         # 列出可用的scheme
-        xcodebuild -list -workspace "iDevice_ZH.xcworkspace"
+        xcodebuild -list $WORKSPACE_ARG
         
         # 使用第一个可用的scheme
-        SCHEME=$(xcodebuild -list -workspace "iDevice_ZH.xcworkspace" | grep -A 10 "Schemes:" | tail -n +2 | grep -v "^$" | head -1 | xargs)
+        SCHEME=$(xcodebuild -list $WORKSPACE_ARG | grep -A 10 "Schemes:" | tail -n +2 | grep -v "^$" | head -1 | xargs)
         echo "使用scheme: $SCHEME"
         
         # 构建而不签名
-        xcodebuild -workspace "iDevice_ZH.xcworkspace" -scheme "$SCHEME" -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+        xcodebuild $WORKSPACE_ARG -scheme "$SCHEME" -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
         
         # 创建导出目录
         mkdir -p $RUNNER_TEMP/build
