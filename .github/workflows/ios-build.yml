@@ -48,26 +48,31 @@ jobs:
         # 准备Info.plist文件
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
-        # 使用更精确的方式修复Info.plist重复问题
-        # 删除所有现有的INFOPLIST_FILE条目
-        grep -v "INFOPLIST_FILE" iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
-        mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
-        
-        # 使用perl添加新的INFOPLIST_FILE引用
-        perl -i -pe 's/(PRODUCT_BUNDLE_IDENTIFIER = .*?;)/\1\n\t\t\t\tINFOPLIST_FILE = "iDevice_ZH\/Info.plist";/g' iDevice_ZH.xcodeproj/project.pbxproj
-        
-        # 检查是否有其他Info.plist的复制构建阶段
-        COPY_PHASE=$(grep -n "Copy Bundle Resources.*Info.plist" -A 10 iDevice_ZH.xcodeproj/project.pbxproj || echo "")
-        
-        if [ ! -z "$COPY_PHASE" ]; then
-          echo "找到Info.plist的复制构建阶段，移除重复引用..."
-          # 移除复制阶段中的Info.plist引用
-          sed -i '' '/Info\.plist in Resources/,/);/s/Info\.plist.*,//' iDevice_ZH.xcodeproj/project.pbxproj
+        # 查找并移除info.plist从Copy Bundle Resources阶段
+        echo "修改前的project.pbxproj中的Info.plist引用:"
+        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "没有找到Info.plist引用"
+
+        # 检查project.pbxproj是否包含Info.plist在资源构建阶段的引用
+        if grep -q "/* Info.plist in Resources */" iDevice_ZH.xcodeproj/project.pbxproj; then
+          echo "找到Info.plist在资源阶段的引用，开始移除..."
+          # 通过临时文件移除Info.plist资源引用
+          grep -v "/* Info.plist in Resources */" iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
+          mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
         fi
         
-        # 检查更改后的状态
-        echo "修复后的project.pbxproj中的Info.plist引用:"
-        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "所有重复的Info.plist引用已清除"
+        # 确保INFOPLIST_FILE设置正确
+        if grep -q "INFOPLIST_FILE" iDevice_ZH.xcodeproj/project.pbxproj; then
+          echo "已存在INFOPLIST_FILE设置，确保其值正确..."
+          sed -i '' 's|INFOPLIST_FILE = ".*";|INFOPLIST_FILE = "iDevice_ZH/Info.plist";|g' iDevice_ZH.xcodeproj/project.pbxproj
+        else
+          echo "添加INFOPLIST_FILE设置..."
+          # 添加INFOPLIST_FILE设置到构建配置中
+          sed -i '' '/PRODUCT_BUNDLE_IDENTIFIER/a\'$'\n''\\t\\t\\t\\tINFOPLIST_FILE = "iDevice_ZH/Info.plist";' iDevice_ZH.xcodeproj/project.pbxproj
+        fi
+        
+        # 检查修改后的状态
+        echo "修改后的project.pbxproj中的Info.plist引用:"
+        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "所有Info.plist引用已处理"
 
     - name: 构建应用
       run: |
@@ -127,21 +132,26 @@ jobs:
         # 准备Info.plist文件
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
-        # 使用更精确的方式修复Info.plist重复问题
-        # 删除所有现有的INFOPLIST_FILE条目
-        grep -v "INFOPLIST_FILE" iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
-        mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
+        # 查找并移除info.plist从Copy Bundle Resources阶段
+        echo "修改前的project.pbxproj中的Info.plist引用:"
+        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "没有找到Info.plist引用"
+
+        # 检查project.pbxproj是否包含Info.plist在资源构建阶段的引用
+        if grep -q "/* Info.plist in Resources */" iDevice_ZH.xcodeproj/project.pbxproj; then
+          echo "找到Info.plist在资源阶段的引用，开始移除..."
+          # 通过临时文件移除Info.plist资源引用
+          grep -v "/* Info.plist in Resources */" iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
+          mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
+        fi
         
-        # 使用perl添加新的INFOPLIST_FILE引用
-        perl -i -pe 's/(PRODUCT_BUNDLE_IDENTIFIER = .*?;)/\1\n\t\t\t\tINFOPLIST_FILE = "iDevice_ZH\/Info.plist";/g' iDevice_ZH.xcodeproj/project.pbxproj
-        
-        # 检查是否有其他Info.plist的复制构建阶段
-        COPY_PHASE=$(grep -n "Copy Bundle Resources.*Info.plist" -A 10 iDevice_ZH.xcodeproj/project.pbxproj || echo "")
-        
-        if [ ! -z "$COPY_PHASE" ]; then
-          echo "找到Info.plist的复制构建阶段，移除重复引用..."
-          # 移除复制阶段中的Info.plist引用
-          sed -i '' '/Info\.plist in Resources/,/);/s/Info\.plist.*,//' iDevice_ZH.xcodeproj/project.pbxproj
+        # 确保INFOPLIST_FILE设置正确
+        if grep -q "INFOPLIST_FILE" iDevice_ZH.xcodeproj/project.pbxproj; then
+          echo "已存在INFOPLIST_FILE设置，确保其值正确..."
+          sed -i '' 's|INFOPLIST_FILE = ".*";|INFOPLIST_FILE = "iDevice_ZH/Info.plist";|g' iDevice_ZH.xcodeproj/project.pbxproj
+        else
+          echo "添加INFOPLIST_FILE设置..."
+          # 添加INFOPLIST_FILE设置到构建配置中
+          sed -i '' '/PRODUCT_BUNDLE_IDENTIFIER/a\'$'\n''\\t\\t\\t\\tINFOPLIST_FILE = "iDevice_ZH/Info.plist";' iDevice_ZH.xcodeproj/project.pbxproj
         fi
       
     - name: 确保正确使用ExportOptions.plist
