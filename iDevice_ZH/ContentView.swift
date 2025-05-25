@@ -1549,7 +1549,7 @@ struct ContentView: View {
                                 tweaksAppliedSuccessfully = false
                             }
                         }) {
-                            Text("明白了！")
+                            Text("知道了！")
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(.white)
                                 .padding(.vertical, 10)
