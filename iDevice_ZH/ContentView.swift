@@ -965,10 +965,10 @@ struct ContentView: View {
                 .padding(.horizontal, 6)
             
             ForEach(TweakCategory.allCases, id: \.self) { category in
-                if let categoryTweaks = tweaksByCategory[category], !categoryTweaks.isEmpty {
+                if category != .custom {
                     TweakCategoryView(
                         category: category,
-                        tweaks: categoryTweaks,
+                        tweaks: tweaksByCategory[category] ?? [],
                         isExpanded: .init(
                             get: { categoryExpanded[category] ?? false },
                             set: { categoryExpanded[category] = $0 }
@@ -1041,41 +1041,7 @@ struct ContentView: View {
                 )
         )
     }
-    
-    struct JailbreakNewsButton: View {
-        var body: some View {
-            Button(action: {
-                if let url = URL(string: "https://github.com/pxx917144686/iDevice_ZH") {
-                    UIApplication.shared.open(url)
-                }
-            }) {
-                HStack {
-                    Image(systemName: "newspaper.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(ToolkitColors.green)
-                        .frame(width: 26)
-                    
-                    Text("👉 看看源代码")
-                        .font(.system(size: 16, weight: .semibold))
-                    
-                    Spacer()
-                    
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.gray)
-                        .padding(.leading, 8)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(ToolkitColors.categoryHeaderBackground)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-            }
-        }
-    }
-    
+        
     private func applyButtonView(scrollProxy: ScrollViewProxy) -> some View {
         VStack(spacing: 12) {
             ToolkitButton(
@@ -1106,7 +1072,6 @@ struct ContentView: View {
                 .fill(ToolkitColors.background)
                 .shadow(color: .black.opacity(0.4), radius: 8, y: -4)
         )
-    }
     
     private var aboutOverlay: some View {
         ZStack {
@@ -1151,13 +1116,13 @@ struct ContentView: View {
                             .fixedSize(horizontal: false, vertical: true)
                         
                         Group {
-                            Text("由[iDevice Central](https://idevicecentral.com)开发")
+                            Text("由[pxx917144686](https://github.com/pxx917144686/iDevice_ZH)修改")
                                 .font(.system(size: 16))
                                 .foregroundColor(.white.opacity(0.9))
                                 .fixedSize(horizontal: false, vertical: true)
                                 .tint(ToolkitColors.accent)
                             
-                            Text("• [GeoSn0w的Twitter](https://twitter.com/FCE365)")
+                            Text("• [原开发者GeoSn0w的Twitter](https://twitter.com/FCE365)")
                                 .font(.system(size: 14))
                                 .foregroundColor(.white.opacity(0.8))
                                 .fixedSize(horizontal: false, vertical: true)
