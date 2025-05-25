@@ -185,24 +185,6 @@ jobs:
         # 显示最终的ExportOptions.plist内容以便验证
         echo "ExportOptions.plist内容:"
         cat $RUNNER_TEMP/ExportOptions.plist
-  
-    - name: 构建和归档 (模拟器)
-      run: |
-        # 确定工作区或项目参数
-        if [ -f "iDevice_ZH.xcworkspace/contents.xcworkspacedata" ]; then
-          WORKSPACE_ARG="-workspace iDevice_ZH.xcworkspace"
-        else
-          WORKSPACE_ARG="-project iDevice_ZH.xcodeproj"
-        fi
-        
-        # 列出可用的scheme
-        xcodebuild -list $WORKSPACE_ARG
-        
-        # 针对模拟器构建并归档
-        xcodebuild $WORKSPACE_ARG -scheme "iDevice_ZH" -configuration Debug -sdk iphonesimulator -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO EXCLUDED_ARCHS=arm64 INFOPLIST_FILE="iDevice_ZH/Info.plist"
-        
-        # 检查归档是否成功
-        ls -la $RUNNER_TEMP/iDevice_ZH.xcarchive/Products/ || true
     
     - name: 手动创建IPA
       run: |
