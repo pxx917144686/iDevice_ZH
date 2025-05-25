@@ -51,6 +51,23 @@ jobs:
         # 从Copy Bundle Resources构建阶段移除Info.plist以避免重复
         sed -i '' '/iDevice_ZH\/Info.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
 
+    - name: 修复Info.plist冲突问题
+      run: |
+        # 准备Info.plist文件
+        cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
+        
+        # 从Copy Bundle Resources构建阶段移除Info.plist引用
+        # 使用更精确的grep命令确保删除正确的行
+        if grep -q "iDevice_ZH/Info.plist" iDevice_ZH.xcodeproj/project.pbxproj; then
+          echo "找到Info.plist引用，正在删除..."
+          sed -i '' '/iDevice_ZH\/Info.plist.*fileRef/d' iDevice_ZH.xcodeproj/project.pbxproj
+        else
+          echo "未找到Info.plist引用，可能已被删除"
+        fi
+        
+        # 确保构建时不使用命令行参数指定Info.plist文件
+        # 而是让Xcode从项目设置中获取
+    
     - name: 构建应用
       run: |
         if [ -f "iDevice_ZH.xcworkspace/contents.xcworkspacedata" ]; then
@@ -63,7 +80,7 @@ jobs:
         xcodebuild -list $WORKSPACE_ARG
         
         # 使用模拟器构建
-        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO INFOPLIST_FILE="iDevice_ZH/Info.plist"
+        xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
       working-directory: ${{ github.workspace }}
       
     - name: 上传构建产物
@@ -112,6 +129,23 @@ jobs:
         # 从Copy Bundle Resources构建阶段移除Info.plist以避免重复
         sed -i '' '/iDevice_ZH\/Info.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
       
+    - name: 修复Info.plist冲突问题
+      run: |
+        # 准备Info.plist文件
+        cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
+        
+        # 从Copy Bundle Resources构建阶段移除Info.plist引用
+        # 使用更精确的grep命令确保删除正确的行
+        if grep -q "iDevice_ZH/Info.plist" iDevice_ZH.xcodeproj/project.pbxproj; then
+          echo "找到Info.plist引用，正在删除..."
+          sed -i '' '/iDevice_ZH\/Info.plist.*fileRef/d' iDevice_ZH.xcodeproj/project.pbxproj
+        else
+          echo "未找到Info.plist引用，可能已被删除"
+        fi
+        
+        # 确保构建时不使用命令行参数指定Info.plist文件
+        # 而是让Xcode从项目设置中获取
+  
     - name: 确保正确使用ExportOptions.plist
       run: |
         # 使用项目中现有的ExportOptions.plist，如果存在的话
