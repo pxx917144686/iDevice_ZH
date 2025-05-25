@@ -54,6 +54,18 @@ jobs:
           sed -i '' '/Info.plist in Resources/d' iDevice_ZH.xcodeproj/project.pbxproj
         fi
     
+    - name: 清理构建缓存
+      run: |
+        xcodebuild clean -workspace iDevice_ZH.xcworkspace -scheme iDevice_ZH || xcodebuild clean -project iDevice_ZH.xcodeproj -scheme iDevice_ZH
+        rm -rf ~/Library/Developer/Xcode/DerivedData/*
+        rm -rf ~/Library/Caches/org.carthage.CarthageKit/dependencies/*
+
+    - name: 设置编译环境
+      run: |
+        # 确保模块缓存目录存在
+        mkdir -p ~/Library/Developer/Xcode/DerivedData/ModuleCache
+        chmod -R 755 ~/Library/Developer/Xcode/DerivedData/ModuleCache
+
     - name: 构建和归档应用
       run: |
         # 确定工作区或项目参数
