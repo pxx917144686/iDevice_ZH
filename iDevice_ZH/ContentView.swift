@@ -638,6 +638,8 @@ struct ContentView: View {
     @StateObject private var customTweakManager = CustomTweakManager.shared
     @State private var showCustomTweakCreator: Bool = false
     @State private var cancellableStore = CancellableStore()
+    @StateObject private var themeManager = ThemeManager.shared
+    @State private var showingThemeSheet = false
     
     private var enabledTweaks: [TweakPathForFile] {
         let builtInTweaks = tweaks.filter { tweak in enabledTweakIds.contains(tweak.id) }
@@ -845,7 +847,7 @@ struct ContentView: View {
             }) {
                 Image(systemName: "info.circle")
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(ToolkitColors.accent.opacity(0.9))
+                    .foregroundColor(themeManager.currentAccentColor.opacity(0.9))
             }
             .padding(.trailing, 8)
             
@@ -853,13 +855,26 @@ struct ContentView: View {
             HStack(spacing: 8) {
                 Image(systemName: "wrench.and.screwdriver.fill")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(ToolkitColors.accent)
+                    .foregroundColor(themeManager.currentAccentColor)
                 
                 Text("iDevice_ZH")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
             }
             Spacer()
+            
+            // 新增彩色图标按钮
+            Button(action: {
+                withAnimation {
+                    showingThemeSheet = true
+                }
+            }) {
+                Image(systemName: "paintbrush.pointed.fill")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(themeManager.currentGreenColor)
+                    .shadow(color: themeManager.currentGreenColor.opacity(0.5), radius: 3)
+            }
+            .padding(.trailing, 8)
             
             Button(action: {
                 iDeviceLogger("打开终端窗口")
@@ -869,7 +884,7 @@ struct ContentView: View {
             }) {
                 Image(systemName: "terminal")
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(ToolkitColors.accent.opacity(0.9))
+                    .foregroundColor(themeManager.currentAccentColor.opacity(0.9))
             }
             .padding(.trailing, 8)
             
@@ -880,10 +895,9 @@ struct ContentView: View {
             }) {
                 Image(systemName: "folder")
                     .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(ToolkitColors.accent.opacity(0.9))
+                    .foregroundColor(themeManager.currentAccentColor.opacity(0.9))
             }
             .padding(.trailing, 8)
-            
         }
         .padding(.horizontal, 22)
         .padding(.vertical, 16)
@@ -894,6 +908,9 @@ struct ContentView: View {
                 .edgesIgnoringSafeArea(.top)
         )
         .preferredColorScheme(.dark)
+        .sheet(isPresented: $showingThemeSheet) {
+            ThemeSettingsView()
+        }
     }
     
     private var contentStack: some View {
@@ -1624,6 +1641,78 @@ struct ContentView: View {
         } else {
             iDeviceLogger("[+] 路径漏洞利用成功: \(path)")
             return nil
+        }
+    }
+}
+
+// 添加主题设置视图
+struct ThemeSettingsView: View {
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @Environment(\.presentationMode) var presentationMode
+    
+    var body: some View {
+        NavigationView {
+            ZStack {
+                ToolkitColors.background.ignoresSafeArea()
+                
+                VStack(spacing: 24) {
+                    Text("自定义界面颜色")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.top)
+                    
+                    colorPickerSection(title: "主题色", color: $themeManager.accentColor, iconName: "circle.fill")
+                    
+                    colorPickerSection(title: "强调色", color: $themeManager.greenColor, iconName: "circle.fill")
+                    
+                    Button(action: {
+                        themeManager.resetToDefaults()
+                    }) {
+                        Text("重置为默认颜色")
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(ToolkitColors.darkBlue)
+                            )
+                    }
+                    .padding(.top, 20)
+                    
+                    Spacer()
+                }
+                .padding()
+            }
+            .navigationBarTitle("界面定制", displayMode: .inline)
+            .navigationBarItems(trailing: Button("完成") {
+                presentationMode.wrappedValue.dismiss()
+            })
+        }
+    }
+    
+    private func colorPickerSection(title: String, color: Binding<Color>, iconName: String) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.headline)
+                .foregroundColor(.white)
+            
+            HStack {
+                Circle()
+                    .fill(color.wrappedValue)
+                    .frame(width: 30, height: 30)
+                    .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
+                
+                Spacer()
+                
+                ColorPickerButton(selectedColor: color) { newColor in
+                    // 颜色变化回调，可以在这里添加额外逻辑
+                }
+                .frame(width: 40, height: 40)
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(ToolkitColors.darkBlue.opacity(0.5))
+            )
         }
     }
 }
