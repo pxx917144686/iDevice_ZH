@@ -57,7 +57,7 @@ struct SplashView: View {
                         .font(.system(size: 32, weight: .heavy))
                         .foregroundColor(.white)
                     
-                    Text("由 iDevice Central 开发")
+                    Text("由 pxx917144686 修改")
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(ToolkitColors.accent.opacity(0.9))
                         .padding(.top, 4)
@@ -73,7 +73,7 @@ struct SplashView: View {
                 
                 Spacer()
                 
-                Text("解锁 iOS 自定义功能")
+                Text("iOS 自定义功能")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(ToolkitColors.accent.opacity(0.7))
                     .padding(.bottom, 30)
