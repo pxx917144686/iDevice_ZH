@@ -37,7 +37,7 @@ jobs:
         fi
       working-directory: ${{ github.workspace }}
       
-    - name: 彻底修复Info.plist问题
+    - name: 彻底修复Info.plist重复问题
       run: |
         # 创建桥接头文件
         echo "int poc(char *path);" > iDevice_ZH/iDevice_ZH-Bridge-Header.h
@@ -48,73 +48,22 @@ jobs:
         # 准备Info.plist文件
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
-        # 备份原始项目文件
-        cp iDevice_ZH.xcodeproj/project.pbxproj iDevice_ZH.xcodeproj/project.pbxproj.backup
+        echo "原始project.pbxproj中的Info.plist引用:"
+        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "没有找到Info.plist引用"
         
-        # 使用Python脚本彻底清理项目文件中的Info.plist引用
-        python3 -c "
-import re
-import sys
-
-# 读取项目文件
-with open('iDevice_ZH.xcodeproj/project.pbxproj', 'r') as f:
-    content = f.read()
-
-print('原始项目文件大小:', len(content), '字符')
-
-# 删除所有包含Info.plist的行（在Copy Bundle Resources部分）
-lines = content.split('\n')
-new_lines = []
-in_copy_bundle_resources = False
-brace_count = 0
-
-for line in lines:
-    # 检测Copy Bundle Resources部分的开始
-    if 'Copy Bundle Resources' in line or '13E42FB3C29B95C100B9FAF1' in line:
-        in_copy_bundle_resources = True
-        brace_count = 0
-        new_lines.append(line)
-        continue
-    
-    # 在Copy Bundle Resources部分中
-    if in_copy_bundle_resources:
-        # 计算大括号以确定何时结束该部分
-        brace_count += line.count('{') - line.count('}')
+        # 彻底删除所有Info.plist相关引用
+        # 删除文件引用
+        sed -i '' '/Info\.plist.*= {isa = PBXFileReference/d' iDevice_ZH.xcodeproj/project.pbxproj
+        # 删除构建文件引用
+        sed -i '' '/Info\.plist.*= {isa = PBXBuildFile/d' iDevice_ZH.xcodeproj/project.pbxproj
+        # 删除Copy Bundle Resources中的引用
+        sed -i '' '/.*Info\.plist.*fileRef/d' iDevice_ZH.xcodeproj/project.pbxproj
+        # 删除任何路径相关的Info.plist引用
+        sed -i '' '/iDevice_ZH\/Info\.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
+        sed -i '' '/Info\.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
         
-        # 如果这行包含Info.plist引用，跳过它
-        if 'Info.plist' in line and ('fileRef' in line or '.plist' in line):
-            print('删除行:', line.strip())
-            continue
-        
-        new_lines.append(line)
-        
-        # 如果大括号计数回到0或负数，我们已经离开了Copy Bundle Resources部分
-        if brace_count <= 0:
-            in_copy_bundle_resources = False
-    else:
-        new_lines.append(line)
-
-# 另外删除所有PBXFileReference中的Info.plist引用
-final_lines = []
-for line in new_lines:
-    if 'PBXFileReference' in line and 'Info.plist' in line:
-        print('删除PBXFileReference行:', line.strip())
-        continue
-    final_lines.append(line)
-
-new_content = '\n'.join(final_lines)
-print('修改后项目文件大小:', len(new_content), '字符')
-
-# 写回文件
-with open('iDevice_ZH.xcodeproj/project.pbxproj', 'w') as f:
-    f.write(new_content)
-
-print('项目文件清理完成')
-"
-        
-        # 验证清理结果
-        echo "检查项目文件中是否还有Info.plist引用:"
-        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "✅ 所有Info.plist引用已清除"
+        echo "清理后的project.pbxproj中的Info.plist引用:"
+        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "所有Info.plist引用已清除"
 
     - name: 构建应用
       run: |
@@ -127,7 +76,7 @@ print('项目文件清理完成')
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 使用模拟器构建 - 明确指定INFOPLIST_FILE
+        # 使用模拟器构建，明确指定Info.plist路径
         xcodebuild clean build $WORKSPACE_ARG -scheme "iDevice_ZH" -destination "platform=iOS Simulator,name=iPhone 16 Pro" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO INFOPLIST_FILE="iDevice_ZH/Info.plist"
       working-directory: ${{ github.workspace }}
       
@@ -163,7 +112,7 @@ print('项目文件清理完成')
         fi
       working-directory: ${{ github.workspace }}
     
-    - name: 彻底修复Info.plist问题
+    - name: 彻底修复Info.plist重复问题
       run: |
         # 创建桥接头文件
         echo "int poc(char *path);" > iDevice_ZH/iDevice_ZH-Bridge-Header.h
@@ -174,73 +123,12 @@ print('项目文件清理完成')
         # 准备Info.plist文件
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
-        # 备份原始项目文件
-        cp iDevice_ZH.xcodeproj/project.pbxproj iDevice_ZH.xcodeproj/project.pbxproj.backup
-        
-        # 使用Python脚本彻底清理项目文件中的Info.plist引用
-        python3 -c "
-import re
-import sys
-
-# 读取项目文件
-with open('iDevice_ZH.xcodeproj/project.pbxproj', 'r') as f:
-    content = f.read()
-
-print('原始项目文件大小:', len(content), '字符')
-
-# 删除所有包含Info.plist的行（在Copy Bundle Resources部分）
-lines = content.split('\n')
-new_lines = []
-in_copy_bundle_resources = False
-brace_count = 0
-
-for line in lines:
-    # 检测Copy Bundle Resources部分的开始
-    if 'Copy Bundle Resources' in line or '13E42FB3C29B95C100B9FAF1' in line:
-        in_copy_bundle_resources = True
-        brace_count = 0
-        new_lines.append(line)
-        continue
-    
-    # 在Copy Bundle Resources部分中
-    if in_copy_bundle_resources:
-        # 计算大括号以确定何时结束该部分
-        brace_count += line.count('{') - line.count('}')
-        
-        # 如果这行包含Info.plist引用，跳过它
-        if 'Info.plist' in line and ('fileRef' in line or '.plist' in line):
-            print('删除行:', line.strip())
-            continue
-        
-        new_lines.append(line)
-        
-        # 如果大括号计数回到0或负数，我们已经离开了Copy Bundle Resources部分
-        if brace_count <= 0:
-            in_copy_bundle_resources = False
-    else:
-        new_lines.append(line)
-
-# 另外删除所有PBXFileReference中的Info.plist引用
-final_lines = []
-for line in new_lines:
-    if 'PBXFileReference' in line and 'Info.plist' in line:
-        print('删除PBXFileReference行:', line.strip())
-        continue
-    final_lines.append(line)
-
-new_content = '\n'.join(final_lines)
-print('修改后项目文件大小:', len(new_content), '字符')
-
-# 写回文件
-with open('iDevice_ZH.xcodeproj/project.pbxproj', 'w') as f:
-    f.write(new_content)
-
-print('项目文件清理完成')
-"
-        
-        # 验证清理结果
-        echo "检查项目文件中是否还有Info.plist引用:"
-        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "✅ 所有Info.plist引用已清除"
+        # 彻底删除所有Info.plist相关引用
+        sed -i '' '/Info\.plist.*= {isa = PBXFileReference/d' iDevice_ZH.xcodeproj/project.pbxproj
+        sed -i '' '/Info\.plist.*= {isa = PBXBuildFile/d' iDevice_ZH.xcodeproj/project.pbxproj
+        sed -i '' '/.*Info\.plist.*fileRef/d' iDevice_ZH.xcodeproj/project.pbxproj
+        sed -i '' '/iDevice_ZH\/Info\.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
+        sed -i '' '/Info\.plist/d' iDevice_ZH.xcodeproj/project.pbxproj
       
     - name: 确保正确使用ExportOptions.plist
       run: |
@@ -294,7 +182,7 @@ print('项目文件清理完成')
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 针对模拟器构建并归档 - 明确指定INFOPLIST_FILE
+        # 针对模拟器构建并归档，明确指定Info.plist
         xcodebuild $WORKSPACE_ARG -scheme "iDevice_ZH" -configuration Debug -sdk iphonesimulator -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO EXCLUDED_ARCHS=arm64 INFOPLIST_FILE="iDevice_ZH/Info.plist"
         
         # 检查归档是否成功
@@ -325,7 +213,7 @@ print('项目文件清理完成')
         if [ -d "$APP_PATH" ]; then
           echo "找到应用程序: $APP_PATH，开始打包IPA..."
           
-          # 验证应用包内的Info.plist，但不尝试复制新的以避免冲突
+          # 验证应用包内的Info.plist
           if [ -f "$APP_PATH/Info.plist" ]; then
             echo "应用包中已有Info.plist文件"
             plutil -p "$APP_PATH/Info.plist" || echo "Info.plist可能存在问题"
