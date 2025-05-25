@@ -32,35 +32,6 @@ jobs:
         else
           echo "没有找到Podfile，跳过CocoaPods依赖安装"
         fi
-    
-    - name: 检查资源文件
-      run: |
-        echo "检查Assets.xcassets目录..."
-        if [ -d "iDevice_ZH/Assets.xcassets" ]; then
-          echo "✅ Assets.xcassets目录存在"
-          echo "目录内容:"
-          ls -la iDevice_ZH/Assets.xcassets/
-        else
-          echo "❌ 未找到Assets.xcassets目录!"
-          exit 1
-        fi
-        
-        # 检查AppIcon.appiconset是否存在
-        if [ -d "iDevice_ZH/Assets.xcassets/AppIcon.appiconset" ]; then
-          echo "✅ AppIcon.appiconset目录存在"
-        else
-          echo "⚠️ 警告: AppIcon.appiconset目录不存在，创建空目录结构"
-          mkdir -p "iDevice_ZH/Assets.xcassets/AppIcon.appiconset"
-          echo '{"images":[],"info":{"version":1,"author":"xcode"}}' > "iDevice_ZH/Assets.xcassets/AppIcon.appiconset/Contents.json"
-        fi
-        
-        # 检查Contents.json文件
-        if [ -f "iDevice_ZH/Assets.xcassets/Contents.json" ]; then
-          echo "✅ Assets.xcassets/Contents.json文件存在"
-        else
-          echo "⚠️ 警告: Contents.json文件不存在，创建默认文件"
-          echo '{"info":{"version":1,"author":"xcode"}}' > "iDevice_ZH/Assets.xcassets/Contents.json"
-        fi
       
     - name: 修复桥接头文件和项目配置
       run: |
@@ -83,18 +54,6 @@ jobs:
           sed -i '' '/Info.plist in Resources/d' iDevice_ZH.xcodeproj/project.pbxproj
         fi
     
-    - name: 清理构建缓存
-      run: |
-        xcodebuild clean -workspace iDevice_ZH.xcworkspace -scheme iDevice_ZH || xcodebuild clean -project iDevice_ZH.xcodeproj -scheme iDevice_ZH
-        rm -rf ~/Library/Developer/Xcode/DerivedData/*
-        rm -rf ~/Library/Caches/org.carthage.CarthageKit/dependencies/*
-
-    - name: 设置编译环境
-      run: |
-        # 确保模块缓存目录存在
-        mkdir -p ~/Library/Developer/Xcode/DerivedData/ModuleCache
-        chmod -R 755 ~/Library/Developer/Xcode/DerivedData/ModuleCache
-
     - name: 构建和归档应用
       run: |
         # 确定工作区或项目参数
@@ -107,7 +66,7 @@ jobs:
         # 列出可用的scheme
         xcodebuild -list $WORKSPACE_ARG
         
-        # 构建并归档应用，增加详细日志
+        # 构建并归档应用
         xcodebuild clean archive $WORKSPACE_ARG \
           -scheme "iDevice_ZH" \
           -configuration Debug \
@@ -116,8 +75,7 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
           SWIFT_OPTIMIZATION_LEVEL="-Onone" \
-          IPHONEOS_DEPLOYMENT_TARGET=16.0 \
-          -verbose
+          IPHONEOS_DEPLOYMENT_TARGET=16.0
       
     - name: 打包IPA
       run: |
