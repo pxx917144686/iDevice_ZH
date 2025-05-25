@@ -56,7 +56,7 @@ struct iDeviceCentralTerminal: View {
                 Button(action: {
                     dismiss()
                 }) {
-                    Text("Dismiss Terminal")
+                    Text("关闭终端")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
                         .padding(.vertical, 12)
