@@ -23,7 +23,7 @@ struct AppUpdate: Codable, Identifiable {
 class UpdateService: ObservableObject {
     static let shared = UpdateService()
     
-    private let updateURL = "https://raw.githubusercontent.com/GeoSn0w/iDevice-Toolkit/refs/heads/main/CoreAppService/currentVer.json"
+    private let updateURL = "https://raw.githubusercontent.com/pxx917144686/iDevice_ZH/refs/heads/main/CoreAppService/currentVer.json"
     public let currentVersion = "1.5.0"
     
     @Published var isCheckingForUpdates = false
