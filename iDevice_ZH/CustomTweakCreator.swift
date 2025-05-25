@@ -152,7 +152,7 @@ var body: some View {
                     }
                 },
                 onError: { error in
-                    errorMessage = "导入错误：\(error.localizedDescription)"
+                    errorMessage = "导入错误： \(error.localizedDescription)"
                     showErrorAlert = true
                 }
             )
@@ -170,7 +170,7 @@ var body: some View {
             case .success(let url):
                 successMessage = "补丁已成功导出至 \(url.lastPathComponent)"
                 showSuccessAlert = true
-                iDeviceLogger("[+] Successfully exported tweak to: \(url.lastPathComponent)")
+                iDeviceLogger("[+] 成功导出: \(url.lastPathComponent)")
             case .failure(let error):
                 exportErrorMessage = "导出失败：\(error.localizedDescription)"
                 showExportErrorAlert = true
@@ -198,7 +198,7 @@ private var headerView: some View {
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(ToolkitColors.accent)
             
-            Text("创建自定义补丁")
+            Text("自定义补丁")
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
         }
@@ -223,13 +223,13 @@ private var formSection: some View {
     VStack(spacing: 20) {
         // Name field
         VStack(alignment: .leading, spacing: 8) {
-            Text("补丁名称")
+            Text("名称")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
             
             TextField("", text: $tweakName)
                 .placeholder(when: tweakName.isEmpty) {
-                    Text("输入补丁名称").foregroundColor(.gray.opacity(0.7))
+                    Text("输入").foregroundColor(.gray.opacity(0.7))
                 }
                 .padding(12)
                 .background(
@@ -285,13 +285,13 @@ private var formSection: some View {
         
         // Description field
         VStack(alignment: .leading, spacing: 8) {
-            Text("描述")
+            Text("介绍")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
             
             ZStack(alignment: .topLeading) {
                 if tweakDescription.isEmpty {
-                    Text("输入补丁描述。这个补丁是做什么的？")
+                    Text("介绍功能?")
                         .foregroundColor(.gray.opacity(0.7))
                         .padding(.top, 12)
                         .padding(.leading, 12)
@@ -370,7 +370,7 @@ private var formSection: some View {
                     )
             )
             
-            Text("示例：/var/mobile/Library/Preferences/com.apple.springboard.plist")
+            Text("示例： /var/mobile/Library/Preferences/com.apple.springboard.plist")
                 .font(.system(size: 12))
                 .foregroundColor(.gray)
                 .padding(.horizontal, 4)
@@ -404,7 +404,7 @@ private var actionButtons: some View {
         if !customTweakManager.customTweaks.isEmpty {
             ToolkitButton(
                 icon: "square.and.arrow.up",
-                text: "导出补丁",
+                text: "导出",
                 disabled: false
             ) {
                 showExportPicker = true
@@ -698,7 +698,7 @@ struct FolderPathSelectorView: View {
                     }
                     
                     HStack {
-                        Text("已选择 \(selectedFiles.count) 个文件")
+                        Text("\(selectedFiles.count) 个文件")
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
                         
@@ -860,7 +860,7 @@ struct FolderPathSelectorView: View {
                 }
             }
         } catch {
-            iDeviceLogger("[!] Failed to list directory contents at \(path): \(error.localizedDescription)")
+            iDeviceLogger("[!] 导出过程中出错: \(path): \(error.localizedDescription)")
             return []
         }
     }
@@ -947,7 +947,75 @@ private func exportTweak(_ tweak: TweakPathForFile) {
     }
 }
 
-// MARK: - File Document
+private func openFolderPathSelector() {
+    showFolderPathInputAlert = true
+}
+
+private func scanFilesInDirectory(_ path: String) {
+    isLoading = true
+    filesList = []
+    selectedFiles = []
+    
+    DispatchQueue.global(qos: .userInitiated).async {
+        let items = listDirectoryContents(at: path)
+        
+        DispatchQueue.main.async {
+            filesList = items
+            isLoading = false
+            showFileSelector = true
+        }
+    }
+}
+
+private func listDirectoryContents(at path: String) -> [FileItem] {
+    var result: [FileItem] = []
+    let fileManager = FileManager.default
+    
+    do {
+        let contents = try fileManager.contentsOfDirectory(atPath: path)
+        
+        for itemName in contents {
+            let fullPath = (path as NSString).appendingPathComponent(itemName)
+            var isDirectory: ObjCBool = false
+            
+            if fileManager.fileExists(atPath: fullPath, isDirectory: &isDirectory) {
+                let item = FileItem(
+                    path: fullPath,
+                    isDirectory: isDirectory.boolValue,
+                    name: itemName
+                )
+                result.append(item)
+            }
+        }
+        
+        return result.sorted { (a, b) -> Bool in
+            if a.isDirectory && !b.isDirectory {
+                return true
+            } else if !a.isDirectory && b.isDirectory {
+                return false
+            } else {
+                return a.name < b.name
+            }
+        }
+    } catch {
+        iDeviceLogger("[!] 无法列出目录 \(path): \(error.localizedDescription)")
+        return []
+    }
+}
+
+private func addSelectedPathsToTweakPaths() {
+    if selectedFiles.isEmpty {
+        return
+    }
+    
+    let newPaths = selectedFiles.joined(separator: ",")
+    
+    if tweakPaths.isEmpty {
+        tweakPaths = newPaths
+    } else {
+        tweakPaths += "," + newPaths
+    }
+}
 
 struct JSONFile: FileDocument {
     static var readableContentTypes: [UTType] { [.json] }
