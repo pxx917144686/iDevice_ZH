@@ -1597,6 +1597,10 @@ struct ContentView: View {
         print("[!] 调整被取消。")
     }
     
+    private var loadedTweaks: [TweakPathForFile] {
+        return tweaks
+    }
+    
     private func runExploitForPath(path: String) throws -> String? {
         iDeviceLogger("[*] 对路径运行漏洞利用: \(path)")
         
@@ -1636,12 +1640,10 @@ struct ContentView: View {
             }
             
             iDeviceLogger("[!] 漏洞利用错误: \(errorMessage)")
-            throw NSError(domain: "ExploitError", code: Int(result), userInfo: [NSLocalizedDescriptionKey: errorMessage])
-            
-        } else {
-            iDeviceLogger("[+] 路径漏洞利用成功: \(path)")
-            return nil
+            return errorMessage
         }
+        
+        return nil
     }
 }
 
