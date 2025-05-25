@@ -10,7 +10,7 @@
     <string>manual</string>
     <key>provisioningProfiles</key>
     <dict>
-        <key>com.idevicecentral.idevice_zh</key>
+        <key>com.pxx917144686.toolkit</key>
         <string>YOUR_PROVISIONING_PROFILE_NAME</string>
     </dict>
 </dict>
