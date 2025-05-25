@@ -35,9 +35,9 @@ class CustomTweakManager: ObservableObject {
             let data = try Data(contentsOf: customTweaksFile)
             let decoder = JSONDecoder()
             customTweaks = try decoder.decode([TweakPathForFile].self, from: data)
-            print("[*] Successfully loaded \(customTweaks.count) custom tweaks")
+            print("[*] 成功加载 \(customTweaks.count) 个自定义补丁")
         } catch {
-            print("[!] Failed to load custom tweaks: \(error.localizedDescription)")
+            print("[!] 加载自定义补丁失败: \(error.localizedDescription)")
         }
     }
     
@@ -47,9 +47,9 @@ class CustomTweakManager: ObservableObject {
             encoder.outputFormatting = .prettyPrinted
             let data = try encoder.encode(customTweaks)
             try data.write(to: customTweaksFile)
-            print("[+] Successfully saved \(customTweaks.count) custom tweaks")
+            print("[+] 成功保存 \(customTweaks.count) 个自定义补丁")
         } catch {
-            print("[!] Failed to save custom tweaks: \(error.localizedDescription)")
+            print("[!] 保存自定义补丁失败: \(error.localizedDescription)")
         }
     }
     
@@ -58,7 +58,7 @@ class CustomTweakManager: ObservableObject {
             let tweakName = customTweaks[index].name
             customTweaks.remove(at: index)
             saveCustomTweaks()
-            iDeviceLogger("[+] Deleted custom tweak: \(tweakName)")
+            iDeviceLogger("[+] 已删除自定义补丁: \(tweakName)")
         }
     }
     
@@ -70,10 +70,10 @@ class CustomTweakManager: ObservableObject {
             
             customTweaks.append(tweak)
             saveCustomTweaks()
-            iDeviceLogger("[+] Added new custom tweak: \(tweak.name)")
+            iDeviceLogger("[+] 已添加新的自定义补丁: \(tweak.name)")
             return true
         } catch {
-            iDeviceLogger("[!] Error adding custom tweak: \(error.localizedDescription)")
+            iDeviceLogger("[!] 添加自定义补丁时出错: \(error.localizedDescription)")
             return false
         }
     }
@@ -98,11 +98,11 @@ class CustomTweakManager: ObservableObject {
                 let exportURL = tempDir.appendingPathComponent("\(fileName).json")
                 
                 try data.write(to: exportURL)
-                iDeviceLogger("[+] Exported tweak: \(tweak.name) to \(exportURL.lastPathComponent)")
+                iDeviceLogger("[+] 已导出补丁: \(tweak.name) 到 \(exportURL.lastPathComponent)")
                 return exportURL
             } catch {
-                print("[!] Failed to export tweak: \(error.localizedDescription)")
-                iDeviceLogger("[!] Error exporting tweak: \(error.localizedDescription)")
+                print("[!] 导出补丁失败: \(error.localizedDescription)")
+                iDeviceLogger("[!] 导出补丁时出错: \(error.localizedDescription)")
                 return nil
             }
         }
@@ -135,18 +135,18 @@ class CustomTweakManager: ObservableObject {
                 }
                 
                 saveCustomTweaks()
-                iDeviceLogger("[+] Successfully imported tweak: \(tweak.name)")
+                iDeviceLogger("[+] 成功导入补丁: \(tweak.name)")
                 
                 try? FileManager.default.removeItem(at: tempURL)
                 
                 return true
             } catch {
-                iDeviceLogger("[!] Error reading file: \(error.localizedDescription)")
+                iDeviceLogger("[!] 读取文件错误: \(error.localizedDescription)")
                 return false
             }
         } catch {
-            print("[!] Failed to import tweak: \(error.localizedDescription)")
-            iDeviceLogger("[!] Error importing tweak: \(error.localizedDescription)")
+            print("[!] 导入补丁失败: \(error.localizedDescription)")
+            iDeviceLogger("[!] 导入补丁时出错: \(error.localizedDescription)")
             return false
         }
     }
