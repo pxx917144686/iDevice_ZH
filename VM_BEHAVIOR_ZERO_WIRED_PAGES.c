@@ -57,8 +57,9 @@
  */
 
 
+
 /***
- * 注意：此代码仅用于教育和研究目的，切勿在未经授权的系统上运行。% python3 -c "print('A'*0x8000)" > AAAAs.txt
+ * % python3 -c "print('A'*0x8000)" > AAAAs.txt
 % chmod a-w AAAAs.txt
 % sudo chown root:wheel AAAAs.txt
 
