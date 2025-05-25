@@ -59,7 +59,10 @@
 
 
 /***
- * % python3 -c "print('A'*0x8000)" > AAAAs.txt
+* 
+* 漏洞利用步骤：
+
+% python3 -c "print('A'*0x8000)" > AAAAs.txt
 % chmod a-w AAAAs.txt
 % sudo chown root:wheel AAAAs.txt
 
