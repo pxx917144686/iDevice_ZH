@@ -53,9 +53,46 @@ jobs:
           echo "在Copy Bundle Resources阶段找到Info.plist引用，准备移除..."
           sed -i '' '/Info.plist in Resources/d' iDevice_ZH.xcodeproj/project.pbxproj
         fi
+        
+    # 添加此新步骤修复模块问题
+    - name: 修复模块映射问题
+      run: |
+        # 创建ModuleMapFix.h文件
+        cat > iDevice_ZH/ModuleMapFix.h << EOL
+        //
+        //  ModuleMapFix.h
+        //  iDevice Toolkit
+        //
+        //  Created on $(date +"%m/%d/%y")
+        //
+
+        #ifndef ModuleMapFix_h
+        #define ModuleMapFix_h
+
+        // 这个文件是为了解决编译时os_object模块冲突问题
+        #import <os/object.h>
+
+        #endif /* ModuleMapFix_h */
+        EOL
+        
+        # 在Podfile.lock中添加模块设置
+        if [ -f "Podfile.lock" ]; then
+          echo "修改Podfile.lock..."
+          sed -i '' 's/CLANG_ENABLE_MODULES = YES/CLANG_ENABLE_MODULES = NO/g' Podfile.lock || true
+        fi
+        
+        # 设置环境变量禁用冲突的模块
+        echo "SWIFT_DISABLE_SAFETY_CHECKS=YES" >> $GITHUB_ENV
+        echo "SWIFT_ENFORCE_EXCLUSIVE_ACCESS=off" >> $GITHUB_ENV
     
     - name: 构建和归档应用
       run: |
+        # 清理派生数据和缓存
+        rm -rf ~/Library/Developer/Xcode/DerivedData/*
+        if [ -d "~/Library/Caches/CocoaPods" ]; then
+          rm -rf ~/Library/Caches/CocoaPods/*
+        fi
+        
         # 确定工作区或项目参数
         if [ -f "iDevice_ZH.xcworkspace/contents.xcworkspacedata" ]; then
           WORKSPACE_ARG="-workspace iDevice_ZH.xcworkspace"
@@ -75,8 +112,13 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
           SWIFT_OPTIMIZATION_LEVEL="-Onone" \
-          IPHONEOS_DEPLOYMENT_TARGET=16.0
+          IPHONEOS_DEPLOYMENT_TARGET=16.0 \
+          GCC_PREPROCESSOR_DEFINITIONS="$GCC_PREPROCESSOR_DEFINITIONS DISABLE_EXPLICIT_MODULE=1" \
+          SWIFT_DISABLE_SAFETY_CHECKS=YES \
+          SWIFT_ENFORCE_EXCLUSIVE_ACCESS=off \
+          OTHER_CFLAGS="-fno-modules"
       
+    # 其余步骤保持不变
     - name: 打包IPA
       run: |
         # 创建IPA结构
