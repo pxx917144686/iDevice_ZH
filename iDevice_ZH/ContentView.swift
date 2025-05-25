@@ -1081,7 +1081,7 @@ struct ContentView: View {
             ToolkitButton(
                 icon: tweaksAppliedSuccessfully ? "arrow.clockwise" : "bolt.fill",
                 text: tweaksAppliedSuccessfully ? "重新启动以应用" :
-                    (progressStep > 0 ? "取消操作" : "应用补丁"),
+                    (progressStep > 0 ? "取消操作" : "执行"),
                 disabled: !hasEnabledTweaks && progressStep == 0 && !tweaksAppliedSuccessfully || !isVersionCompatible
             ) {
                 if progressStep > 0 {
