@@ -1045,7 +1045,7 @@ struct ContentView: View {
     struct JailbreakNewsButton: View {
         var body: some View {
             Button(action: {
-                if let url = URL(string: "https://idevicecentral.com") {
+                if let url = URL(string: "https://github.com/pxx917144686/iDevice_ZH") {
                     UIApplication.shared.open(url)
                 }
             }) {
@@ -1055,7 +1055,7 @@ struct ContentView: View {
                         .foregroundColor(ToolkitColors.green)
                         .frame(width: 26)
                     
-                    Text("iOS越狱新闻")
+                    Text("👉 看看源代码")
                         .font(.system(size: 16, weight: .semibold))
                     
                     Spacer()
