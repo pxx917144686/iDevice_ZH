@@ -37,6 +37,11 @@ jobs:
         fi
       working-directory: ${{ github.workspace }}
       
+    - name: 修复桥接头文件路径
+      run: |
+        echo "int poc(char *path);" > iDevice_ZH/iDevice_ZH-Bridge-Header.h
+        sed -i '' 's|/Users/geosn0w/Desktop/iDevice_ZH/iDevice_ZH/iDevice_ZH-Bridge-Header.h|iDevice_ZH/iDevice_ZH-Bridge-Header.h|g' iDevice_ZH.xcodeproj/project.pbxproj
+
     - name: 构建应用
       run: |
         if [ -f "iDevice_ZH.xcworkspace/contents.xcworkspacedata" ]; then
@@ -73,35 +78,8 @@ jobs:
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: latest-stable
-    
-    - name: 安装证书和配置文件
-      env:
-        BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-        P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-        BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
-        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-      run: |
-        # 创建临时keychain
-        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-        
-        # 导入证书到keychain
-        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-        echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-        security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-        security list-keychain -d user -s $KEYCHAIN_PATH
-        
-        # 安装配置文件
-        PROFILE_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-        echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PROFILE_PATH
-        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        cp $PROFILE_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-        
+  
     - name: 构建和归档
-      env:
-        PROFILE_UUID: ${{ secrets.PROFILE_UUID }}
       run: |
         # 列出可用的scheme
         xcodebuild -list -workspace "iDevice_ZH.xcworkspace"
@@ -110,12 +88,18 @@ jobs:
         SCHEME=$(xcodebuild -list -workspace "iDevice_ZH.xcworkspace" | grep -A 10 "Schemes:" | tail -n +2 | grep -v "^$" | head -1 | xargs)
         echo "使用scheme: $SCHEME"
         
-        xcodebuild -workspace "iDevice_ZH.xcworkspace" -scheme "$SCHEME" -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive -allowProvisioningUpdates
-        xcodebuild -exportArchive -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $RUNNER_TEMP/build
-      
-    - name: 上传IPA
+        # 构建而不签名
+        xcodebuild -workspace "iDevice_ZH.xcworkspace" -scheme "$SCHEME" -archivePath $RUNNER_TEMP/iDevice_ZH.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+        
+        # 创建导出目录
+        mkdir -p $RUNNER_TEMP/build
+        
+        # 复制构建产物（因为没有签名，无法创建IPA，但可以保存构建产物）
+        cp -R $RUNNER_TEMP/iDevice_ZH.xcarchive $RUNNER_TEMP/build/
+    
+    - name: 上传构建产物
       uses: actions/upload-artifact@v4
       with:
-        name: iDevice_ZH-IPA
-        path: ${{ runner.temp }}/build/*.ipa
+        name: iDevice_ZH-Archive
+        path: ${{ runner.temp }}/build/
 
