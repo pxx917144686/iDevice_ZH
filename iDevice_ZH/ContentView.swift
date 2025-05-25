@@ -642,7 +642,7 @@ struct ContentView: View {
     }
     
     private var tweaksByCategory: [TweakCategory: [TweakPathForFile]] {
-        var categories = Dictionary(grouping: tweaks) { $0.category }
+        var categories = Dictionary(grouping: loadedTweaks) { $0.category }
         categories[.custom] = customTweakManager.customTweaks
         return categories
     }
@@ -1072,6 +1072,7 @@ struct ContentView: View {
                 .fill(ToolkitColors.background)
                 .shadow(color: .black.opacity(0.4), radius: 8, y: -4)
         )
+    }
     
     private var aboutOverlay: some View {
         ZStack {
@@ -1141,7 +1142,7 @@ struct ContentView: View {
                             .padding(.vertical, 4)
                         
                         Group {
-                            Text("• 所有补丁都通过修改RAM实现，所以如果出现任何问题，您可以重启设备来清除所有补丁并恢复出厂设置。")
+                            Text("• 所有补丁都通过修改RAM实现，所以如果出现任何问题，你可以重启设备来清除所有补丁并恢复出厂设置。")
                                 .font(.system(size: 14))
                                 .foregroundColor(.white.opacity(0.8))
                                 .fixedSize(horizontal: false, vertical: true)
@@ -1394,7 +1395,7 @@ struct ContentView: View {
                         
                         if tweaksAppliedSuccessfully {
                             iDeviceLogger("\n[*] 下一步:")
-                            iDeviceLogger("   1. 重启您的设备以应用更改")
+                            iDeviceLogger("   1. 重启你的设备以应用更改")
                             iDeviceLogger("   2. 前往设置 > 显示与亮度")
                             iDeviceLogger("   3. 点击显示缩放并切换视图以触发重启")
                         } else {
@@ -1449,7 +1450,7 @@ struct ContentView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("由于漏洞利用限制，您需要手动重启设备才能使补丁生效。")
+                        Text("由于漏洞利用限制，你需要手动重启设备才能使补丁生效。")
                             .font(.system(size: 16))
                             .foregroundColor(.white)
                             .padding(.bottom, 4)
@@ -1491,7 +1492,7 @@ struct ContentView: View {
                                 Text("4.")
                                     .foregroundColor(.white)
                                     .frame(width: 20, alignment: .leading)
-                                Text("这将导致设备重启")
+                                Text("设备重启")
                                     .foregroundColor(.white)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
@@ -1500,7 +1501,7 @@ struct ContentView: View {
                                 Text("5.")
                                     .foregroundColor(.white)
                                     .frame(width: 20, alignment: .leading)
-                                Text("之后您可以切换回您喜欢的选项")
+                                Text("之后，你可以切换回，你喜欢的选项")
                                     .foregroundColor(.white)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
@@ -1515,7 +1516,7 @@ struct ContentView: View {
                                 tweaksAppliedSuccessfully = false
                             }
                         }) {
-                            Text("明白了！")
+                            Text("知道了！")
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(.white)
                                 .padding(.vertical, 10)
