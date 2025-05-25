@@ -53,11 +53,11 @@ struct SplashView: View {
                         .foregroundColor(ToolkitColors.accent)
                         .padding(.bottom, 10)
                     
-                    Text("iDevice Toolkit")
+                    Text("iDevice_ZH")
                         .font(.system(size: 32, weight: .heavy))
                         .foregroundColor(.white)
                     
-                    Text("by iDevice Central")
+                    Text("由 pxx917144686 修改")
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(ToolkitColors.accent.opacity(0.9))
                         .padding(.top, 4)
@@ -73,7 +73,7 @@ struct SplashView: View {
                 
                 Spacer()
                 
-                Text("Unlocking iOS Customization")
+                Text("iOS 自定义功能")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(ToolkitColors.accent.opacity(0.7))
                     .padding(.bottom, 30)
