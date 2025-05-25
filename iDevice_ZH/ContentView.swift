@@ -613,7 +613,7 @@ struct ContentView: View {
     let device = Device.current
     @AppStorage("enabledTweaks") private var enabledTweakIds: [String] = []
     @State private var progressStep: Int = 0
-    @State private var progressText: String = "准备就绪"
+    @State private var progressText: String = "系统兼容"
     @State private var showLogs: Bool = false
     @State private var hasError: Bool = false
     @State private var categoryExpanded: [TweakCategory: Bool] = Dictionary(uniqueKeysWithValues: TweakCategory.allCases.map { ($0, false) })
@@ -933,7 +933,7 @@ struct ContentView: View {
                         .opacity(progressStep > 0 || !isVersionCompatible ? 1.0 : 0.0)
                 }
                 
-                Text(!isVersionCompatible ? "不兼容" : (progressStep > 0 ? "活动中" : "准备就绪"))
+                Text(!isVersionCompatible ? "不兼容" : (progressStep > 0 ? "活动中" : "系统兼容"))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(!isVersionCompatible ? Color.red : (progressStep > 0 ? ToolkitColors.green : .gray))
             }
@@ -1542,7 +1542,7 @@ struct ContentView: View {
     private func resetProgress() {
         withAnimation {
             progressStep = 0
-            progressText = "> 准备就绪"
+            progressText = "> 系统兼容"
             hasError = false
             tweaksAppliedSuccessfully = false
         }
