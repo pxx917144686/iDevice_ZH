@@ -16,6 +16,14 @@ struct TweakPathForFile: Identifiable, Codable {
         case icon, name, paths, description, category
     }
     
+    init(icon: String, name: String, paths: [String], description: String, category: TweakCategory) {
+        self.icon = icon
+        self.name = name
+        self.paths = paths
+        self.description = description
+        self.category = category
+    }
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
@@ -847,7 +855,7 @@ struct ContentView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(ToolkitColors.accent)
                 
-                Text("iDevice Toolkit")
+                Text("iDevice_ZH")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
             }
