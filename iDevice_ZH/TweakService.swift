@@ -13,7 +13,7 @@ class TweaksService {
     
     private init() {}
     
-    private let githubUrl = "https://raw.githubusercontent.com/GeoSn0w/iDevice-Toolkit/refs/heads/main/TweakRepo/tweaks.json"
+    private let githubUrl = "https://raw.githubusercontent.com/pxx917144686/iDevice_ZH/refs/heads/main/TweakRepo/tweaks.json"
     
     func loadTweaks() -> AnyPublisher<[TweakPathForFile], Error> {
         return fetchTweaksFromGitHub()
