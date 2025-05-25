@@ -1021,11 +1021,11 @@ struct ContentView: View {
                 .padding(.top, 2)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("如何恢复补丁")
+                Text("怎么恢复？")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
                 
-                Text("所有补丁都直接应用于RAM而非持久存储。如果您遇到任何问题或想恢复到默认设置，只需重新启动设备即可从内存中清除所有补丁。")
+                Text("👉 重启 恢复")
                     .font(.system(size: 14))
                     .foregroundColor(.white.opacity(0.8))
                     .fixedSize(horizontal: false, vertical: true)
