@@ -18,18 +18,18 @@ class TweaksService {
     func loadTweaks() -> AnyPublisher<[TweakPathForFile], Error> {
         return fetchTweaksFromGitHub()
             .handleEvents(receiveOutput: { tweaks in
-                print("[+] 成功从GitHub获取并使用 \(tweaks.count) 个补丁")
+                print("[+] Successfully fetched and using \(tweaks.count) tweaks from GitHub")
             })
             .catch { [weak self] error -> AnyPublisher<[TweakPathForFile], Error> in
-                print("[!] 从GitHub获取补丁失败: \(error.localizedDescription)")
+                print("[!] Failed to fetch tweaks from GitHub: \(error.localizedDescription)")
                 
                 guard let self = self else {
-                    return Fail(error: NSError(domain: "TweaksService", code: 1, userInfo: [NSLocalizedDescriptionKey: "服务已释放"])).eraseToAnyPublisher()
+                    return Fail(error: NSError(domain: "TweaksService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Service deallocated"])).eraseToAnyPublisher()
                 }
                 
                 return self.loadDefaultTweaks()
                     .handleEvents(receiveOutput: { _ in
-                        print("[+] 使用默认补丁作为备用")
+                        print("[+] Using default tweaks as fallback")
                     })
                     .eraseToAnyPublisher()
             }
@@ -38,7 +38,7 @@ class TweaksService {
     
     private func fetchTweaksFromGitHub() -> AnyPublisher<[TweakPathForFile], Error> {
         guard let url = URL(string: githubUrl) else {
-            return Fail(error: NSError(domain: "TweaksService", code: 2, userInfo: [NSLocalizedDescriptionKey: "无效的GitHub链接"])).eraseToAnyPublisher()
+            return Fail(error: NSError(domain: "TweaksService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Invalid GitHub URL"])).eraseToAnyPublisher()
         }
         
         return URLSession.shared.dataTaskPublisher(for: url)
@@ -47,10 +47,10 @@ class TweaksService {
                 do {
                     let decoder = JSONDecoder()
                     let tweaks = try decoder.decode([TweakPathForFile].self, from: data)
-                    print("[+] 成功从GitHub获取补丁")
+                    print("[+] Successfully fetched tweaks from GitHub")
                     return tweaks
                 } catch {
-                    print("[!] 补丁JSON解码错误: \(error.localizedDescription)")
+                    print("[!] Tweaks JSON decoding error: \(error.localizedDescription)")
                     throw error
                 }
             }
@@ -81,67 +81,67 @@ struct DefaultTweaks {
     static let tweaks: [TweakPathForFile] = {
         guard let jsonData = defaultTweaksJSON.data(using: .utf8),
               let tweaks = try? JSONDecoder().decode([TweakPathForFile].self, from: jsonData) else {
-            print("[!] 解析硬编码补丁JSON失败")
+            print("[!] Failed to parse hardcoded tweaks JSON")
             return []
         }
         return tweaks
     }()
     
-    // 用户无网络等情况下的默认补丁JSON字符串
+    // The default tweaks JSON string in case the user has no wifi, etc.
     
     static let defaultTweaksJSON = """
     [
       {
         "icon": "dock.rectangle",
-        "name": "隐藏Dock栏",
+        "name": "Hide the Dock",
         "paths": [
           "/System/Library/PrivateFrameworks/CoreMaterial.framework/dockDark.materialrecipe",
           "/System/Library/PrivateFrameworks/CoreMaterial.framework/dockLight.materialrecipe"
         ],
-        "description": "完全移除主屏幕底部Dock栏的背景。补丁由@Skadz108开发。",
-        "category": "外观"
+        "description": "Completely remove the dock background from your home screen. Tweak by @Skadz108.",
+        "category": "Aesthetics"
       },
       {
         "icon": "line.3.horizontal",
-        "name": "隐藏底部指示条",
+        "name": "Hide the Home Bar",
         "paths": [
           "/System/Library/PrivateFrameworks/MaterialKit.framework/Assets.car"
         ],
-        "description": "移除底部的主页指示条。补丁由@Skadz108开发。",
-        "category": "外观"
+        "description": "Remove the bottom home indicator bar. Tweak by @Skadz108.",
+        "category": "Aesthetics"
       },
       {
         "icon": "folder",
-        "name": "隐藏文件夹背景",
+        "name": "Hide Folder Backgrounds",
         "paths": [
           "/System/Library/PrivateFrameworks/SpringBoardHome.framework/folderDark.materialrecipe",
           "/System/Library/PrivateFrameworks/SpringBoardHome.framework/folderLight.materialrecipe"
         ],
-        "description": "使应用文件夹完全透明。补丁由@Skadz108开发。",
-        "category": "外观"
+        "description": "Make app folders completely transparent. Tweak by @Skadz108.",
+        "category": "Aesthetics"
       },
       {
         "icon": "lock.iphone",
-        "name": "隐藏解锁背景",
+        "name": "Hide Unlock Background",
         "paths": [
           "/System/Library/PrivateFrameworks/CoverSheet.framework/dashBoardPasscodeBackground.materialrecipe"
         ],
-        "description": "移除锁屏界面密码输入背景",
-        "category": "外观"
+        "description": "Remove the passcode entry background on the lock screen",
+        "category": "Aesthetics"
       },
       {
         "icon": "bubble.left",
-        "name": "简洁消息气泡",
+        "name": "Clean Message Bubbles",
         "paths": [
           "/System/Library/PrivateFrameworks/ChatKit.framework/bubbleDark.materialrecipe",
           "/System/Library/PrivateFrameworks/ChatKit.framework/bubbleLight.materialrecipe"
         ],
-        "description": "简化信息应用中聊天气泡的外观",
-        "category": "实验性"
+        "description": "Simplify the look of chat bubbles in Messages",
+        "category": "Experimental"
       },
       {
         "icon": "square.stack.3d.forward.dottedline",
-        "name": "透明播放器和通知",
+        "name": "Transparent Player & Notis",
         "paths": [
           "/System/Library/PrivateFrameworks/CoreMaterial.framework/platterStrokeLight.visualstyleset",
           "/System/Library/PrivateFrameworks/CoreMaterial.framework/platterStrokeDark.visualstyleset",
@@ -150,12 +150,12 @@ struct DefaultTweaks {
           "/System/Library/PrivateFrameworks/SpringBoardHome.framework/folderDark.materialrecipe",
           "/System/Library/PrivateFrameworks/CoreMaterial.framework/platters.materialrecipe"
         ],
-        "description": "透明化媒体播放器和通知。补丁由@straight_tamago / mdc0开发",
-        "category": "外观"
+        "description": "Transparent Media Player & Notifications. Tweak by @straight_tamago / mdc0",
+        "category": "Aesthetics"
       },
       {
         "icon": "eye.slash.fill",
-        "name": "关闭相机快门声",
+        "name": "Kill Camera Shutter Sound",
         "paths": [
            "/System/Library/Audio/UISounds/photoShutter.caf",
                   "/System/Library/Audio/UISounds/begin_record.caf",
@@ -164,20 +164,20 @@ struct DefaultTweaks {
                   "/System/Library/Audio/UISounds/Modern/camera_shutter_burst_begin.caf",
                   "/System/Library/Audio/UISounds/Modern/camera_shutter_burst_end.caf"
           ],
-        "description": "禁用相机快门声。关闭相机应用可能会重新启用它。补丁由@straight_tamago开发",
-        "category": "隐私"
+        "description": "Disables camera shutter sound. Killing the Camera app may re-enable it. Tweak by @straight_tamago",
+        "category": "Privacy"
       },
        {
         "icon": "eye.slash.fill",
-        "name": "关闭通话录音提示音",
+        "name": "Kill Call Recording Sound",
         "paths": [
            "/var/mobile/Library/CallServices/Greetings/default/StartDisclosure.caf",
             "/var/mobile/Library/CallServices/Greetings/default/StartDisclosureWithTone.m4a",
             "/var/mobile/Library/CallServices/Greetings/default/StopDisclosure.caf",
             "/System/Library/PrivateFrameworks/ConversationKit.framework/call_recording_countdown.caf"
           ],
-        "description": "在iOS 18+上禁用启用通话录音的通知声音。补丁由@straight_tamago开发",
-        "category": "隐私"
+        "description": "Disables the notification sound for enabled call recording on iOS 18+. Tweak by @straight_tamago",
+        "category": "Privacy"
       },
     ]
     """
