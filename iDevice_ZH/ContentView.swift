@@ -47,7 +47,7 @@ enum TweakCategory: String, Codable, CaseIterable {
     case aesthetics = "外观"
     case performance = "性能"
     case privacy = "隐私"
-    case experimental = "实验性"
+    case experimental = "测试"
     case custom = "自定义补丁"
 }
 
