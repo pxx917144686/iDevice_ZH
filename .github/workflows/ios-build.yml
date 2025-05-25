@@ -48,16 +48,23 @@ jobs:
         # 准备Info.plist文件
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
-        # 查找并移除info.plist从Copy Bundle Resources阶段
+        # 查找并彻底移除 Copy Bundle Resources 阶段中的 Info.plist 引用
         echo "修改前的project.pbxproj中的Info.plist引用:"
-        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "没有找到Info.plist引用"
-
-        # 检查project.pbxproj是否包含Info.plist在资源构建阶段的引用
-        if grep -q "/* Info.plist in Resources */" iDevice_ZH.xcodeproj/project.pbxproj; then
-          echo "找到Info.plist在资源阶段的引用，开始移除..."
-          # 通过临时文件移除Info.plist资源引用
-          grep -v "/* Info.plist in Resources */" iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
-          mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
+        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj
+        
+        # 先输出文件列表，查找PBXBuildFile中的Info.plist项目
+        INFOPLIST_FILE_REF=$(grep -A 1 "Info.plist in Resources" iDevice_ZH.xcodeproj/project.pbxproj | grep "isa = PBXBuildFile" -B 1 | head -1 | cut -d' ' -f1 | tr -d '\t\n\r')
+        
+        if [ ! -z "$INFOPLIST_FILE_REF" ]; then
+          echo "找到Info.plist的文件引用: $INFOPLIST_FILE_REF，准备移除..."
+          
+          # 移除PBXBuildFile中的引用
+          sed -i '' "/$INFOPLIST_FILE_REF/,+1 d" iDevice_ZH.xcodeproj/project.pbxproj
+          
+          # 移除PBXResourcesBuildPhase中的引用
+          sed -i '' "/Info.plist in Resources/d" iDevice_ZH.xcodeproj/project.pbxproj
+        else
+          echo "没有找到Info.plist在PBXBuildFile中的引用"
         fi
         
         # 确保INFOPLIST_FILE设置正确
@@ -72,8 +79,8 @@ jobs:
         
         # 检查修改后的状态
         echo "修改后的project.pbxproj中的Info.plist引用:"
-        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "所有Info.plist引用已处理"
-
+        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj
+    
     - name: 构建应用
       run: |
         if [ -f "iDevice_ZH.xcworkspace/contents.xcworkspacedata" ]; then
@@ -132,16 +139,23 @@ jobs:
         # 准备Info.plist文件
         cp iDevice-Toolkit-Info.plist iDevice_ZH/Info.plist
         
-        # 查找并移除info.plist从Copy Bundle Resources阶段
+        # 查找并彻底移除 Copy Bundle Resources 阶段中的 Info.plist 引用
         echo "修改前的project.pbxproj中的Info.plist引用:"
-        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj || echo "没有找到Info.plist引用"
-
-        # 检查project.pbxproj是否包含Info.plist在资源构建阶段的引用
-        if grep -q "/* Info.plist in Resources */" iDevice_ZH.xcodeproj/project.pbxproj; then
-          echo "找到Info.plist在资源阶段的引用，开始移除..."
-          # 通过临时文件移除Info.plist资源引用
-          grep -v "/* Info.plist in Resources */" iDevice_ZH.xcodeproj/project.pbxproj > project.pbxproj.tmp
-          mv project.pbxproj.tmp iDevice_ZH.xcodeproj/project.pbxproj
+        grep -n "Info.plist" iDevice_ZH.xcodeproj/project.pbxproj
+        
+        # 先输出文件列表，查找PBXBuildFile中的Info.plist项目
+        INFOPLIST_FILE_REF=$(grep -A 1 "Info.plist in Resources" iDevice_ZH.xcodeproj/project.pbxproj | grep "isa = PBXBuildFile" -B 1 | head -1 | cut -d' ' -f1 | tr -d '\t\n\r')
+        
+        if [ ! -z "$INFOPLIST_FILE_REF" ]; then
+          echo "找到Info.plist的文件引用: $INFOPLIST_FILE_REF，准备移除..."
+          
+          # 移除PBXBuildFile中的引用
+          sed -i '' "/$INFOPLIST_FILE_REF/,+1 d" iDevice_ZH.xcodeproj/project.pbxproj
+          
+          # 移除PBXResourcesBuildPhase中的引用
+          sed -i '' "/Info.plist in Resources/d" iDevice_ZH.xcodeproj/project.pbxproj
+        else
+          echo "没有找到Info.plist在PBXBuildFile中的引用"
         fi
         
         # 确保INFOPLIST_FILE设置正确
