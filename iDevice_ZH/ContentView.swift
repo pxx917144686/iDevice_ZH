@@ -44,7 +44,7 @@ extension TweakPathForFile {
 }
 
 enum TweakCategory: String, Codable, CaseIterable {
-    case aesthetics = "美观"
+    case aesthetics = "美化"
     case performance = "性能"
     case privacy = "隐私"
     case experimental = "调整"
@@ -640,7 +640,7 @@ struct ContentView: View {
     }
     
     private var tweaksByCategory: [TweakCategory: [TweakPathForFile]] {
-        var categories = Dictionary(grouping: tweaks) { $0.category }
+        var categories = Dictionary(grouping: loadedTweaks) { $0.category }
         categories[.custom] = customTweakManager.customTweaks
         return categories
     }
@@ -954,7 +954,7 @@ struct ContentView: View {
                 .padding(.horizontal, 6)
             
             ForEach(TweakCategory.allCases, id: \.self) { category in
-                if let categoryTweaks = tweaksByCategory[category], !categoryTweaks.isEmpty {
+                if let categoryTweaks = tweaksByCategory[category] {
                     TweakCategoryView(
                         category: category,
                         tweaks: categoryTweaks,
@@ -1010,11 +1010,11 @@ struct ContentView: View {
                 .padding(.top, 2)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("如何恢复调整")
+                Text("怎么恢复？")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.white)
                 
-                Text("所有调整都直接应用于内存而非持久性存储。如果遇到任何问题或想要恢复到默认设置，只需重启设备即可清除内存中的所有调整。")
+                Text("如果遇到任何问题或想要恢复到默认设置！重启iPhone恢复")
                     .font(.system(size: 14))
                     .foregroundColor(.white.opacity(0.8))
                     .fixedSize(horizontal: false, vertical: true)
