@@ -23,7 +23,7 @@ struct AppUpdate: Codable, Identifiable {
 class UpdateService: ObservableObject {
     static let shared = UpdateService()
     
-    private let updateURL = "https://raw.githubusercontent.com/GeoSn0w/iDevice-Toolkit/refs/heads/main/CoreAppService/currentVer.json"
+    private let updateURL = "https://raw.githubusercontent.com/pxx917144686/iDevice_ZH/refs/heads/main/CoreAppService/currentVer.json"
     public let currentVersion = "1.5.0"
     
     @Published var isCheckingForUpdates = false
@@ -40,7 +40,7 @@ class UpdateService: ObservableObject {
         updateError = nil
         
         guard let url = URL(string: updateURL) else {
-            handleError("Invalid update URL")
+            handleError("无效的更新URL")
             return
         }
         
@@ -54,7 +54,7 @@ class UpdateService: ObservableObject {
                     self.isCheckingForUpdates = false
                     
                     if case .failure(let error) = completion {
-                        self.handleError("Failed to check for updates: \(error.localizedDescription)")
+                        self.handleError("检查更新失败: \(error.localizedDescription)")
                     }
                 },
                 receiveValue: { [weak self] update in
@@ -63,9 +63,9 @@ class UpdateService: ObservableObject {
                     if self.isNewerVersion(update.latestVersion, thanCurrent: self.currentVersion) {
                         self.updateAvailable = update
                         self.showUpdateAlert = true
-                        print("[+] Update available: \(update.latestVersion)")
+                        print("[+] 发现可用更新: \(update.latestVersion)")
                     } else {
-                        print("[i] No updates available. Current: \(self.currentVersion), Latest: \(update.latestVersion)")
+                        print("[i] 没有可用更新。当前版本: \(self.currentVersion), 最新版本: \(update.latestVersion)")
                         self.updateAvailable = nil
                     }
                 }
@@ -127,7 +127,7 @@ struct UpdateAlertView: View {
                             .font(.system(size: 20))
                             .foregroundColor(update.criticalUpdate ? Color.red : ToolkitColors.accent)
                         
-                        Text(update.criticalUpdate ? "Critical Update Available" : "Update Available")
+                        Text(update.criticalUpdate ? "重要更新可用" : "更新可用")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
                         
@@ -153,7 +153,7 @@ struct UpdateAlertView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             HStack(spacing: 16) {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text("Current Version")
+                                    Text("当前版本")
                                         .font(.system(size: 14))
                                         .foregroundColor(.gray)
                                     Text(updateService.currentVersion)
@@ -170,7 +170,7 @@ struct UpdateAlertView: View {
                                 Spacer()
                                 
                                 VStack(alignment: .trailing, spacing: 8) {
-                                    Text("New Version")
+                                    Text("新版本")
                                         .font(.system(size: 14))
                                         .foregroundColor(.gray)
                                     Text(update.latestVersion)
@@ -190,7 +190,7 @@ struct UpdateAlertView: View {
                                     }
                                 }) {
                                     HStack {
-                                        Text("What's New")
+                                        Text("更新内容")
                                             .font(.system(size: 15, weight: .semibold))
                                             .foregroundColor(.white)
                                         
@@ -218,7 +218,7 @@ struct UpdateAlertView: View {
                             }
                             
                             HStack {
-                                Text("Released on:")
+                                Text("发布日期:")
                                     .font(.system(size: 14))
                                     .foregroundColor(.gray)
                                 
@@ -235,7 +235,7 @@ struct UpdateAlertView: View {
                                             updateService.showUpdateAlert = false
                                         }
                                     }) {
-                                        Text("Later")
+                                        Text("稍后")
                                             .font(.system(size: 16, weight: .medium))
                                             .foregroundColor(.white)
                                             .padding(.vertical, 12)
@@ -250,7 +250,7 @@ struct UpdateAlertView: View {
                                         openURL(url)
                                     }
                                 }) {
-                                    Text(update.criticalUpdate ? "Update Now" : "Download")
+                                    Text(update.criticalUpdate ? "立即更新" : "下载")
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundColor(.white)
                                         .padding(.vertical, 12)
