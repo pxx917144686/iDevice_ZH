@@ -53,7 +53,7 @@ struct SplashView: View {
                         .foregroundColor(ToolkitColors.accent)
                         .padding(.bottom, 10)
                     
-                    Text("iDevice 工具箱")
+                    Text("iDevice_ZH")
                         .font(.system(size: 32, weight: .heavy))
                         .foregroundColor(.white)
                     
