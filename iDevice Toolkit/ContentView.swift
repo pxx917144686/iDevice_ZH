@@ -858,7 +858,7 @@ struct ContentView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(ToolkitColors.accent)
                 
-                Text("iDevice 工具箱")
+                Text("iDevice_ZH")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
             }
@@ -1119,7 +1119,7 @@ struct ContentView: View {
                 }
             VStack(spacing: 0) {
                 HStack {
-                    Text("关于iDevice工具箱")
+                    Text("关于iDevice_ZH")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
                     
@@ -1141,7 +1141,7 @@ struct ContentView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("iDevice工具箱")
+                        Text("iDevice_ZH")
                             .font(.system(size: 24, weight: .bold))
                             .foregroundColor(ToolkitColors.accent)
                         
