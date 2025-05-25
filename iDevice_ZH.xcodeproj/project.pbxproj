@@ -102,11 +102,12 @@
 				};
 			};
 			buildConfigurationList = 4397F94C2DCDDA0100090799 /* Build configuration list for PBXProject "iDevice_ZH" */;
-			developmentRegion = en;
+			developmentRegion = zh-Hans;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = 4397F9482DCDDA0100090799;
 			minimizedProjectReferenceProxies = 1;
