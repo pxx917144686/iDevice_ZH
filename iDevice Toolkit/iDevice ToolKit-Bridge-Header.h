@@ -1,1 +1,0 @@
-int poc(char *path);
